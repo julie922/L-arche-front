@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import FichesEspecesPage from './pages/FichesEspecesPage'
+import FicheDetailPage from './pages/FicheDetailPage'
+import SousEspeceDetailPage from './pages/SousEspeceDetailPage'
 
 function App() {
   return (
@@ -9,6 +12,9 @@ function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/fiches-especes" element={<FichesEspecesPage />} />
+        <Route path="/fiches-especes/:id" element={<FicheDetailPage />} />
+        <Route path="/fiches-especes/:id/:sousId" element={<SousEspeceDetailPage />} />
       </Routes>
     </BrowserRouter>
   )
