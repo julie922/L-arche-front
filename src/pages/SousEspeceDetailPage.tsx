@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import NavbarPublic from '../components/NavbarPublic'
+import Header from '../components/Header'
 import { ESPECES } from '../data/especes'
 
 function Wave() {
@@ -67,7 +67,7 @@ export default function SousEspeceDetailPage() {
   if (!espece || !sousEspece) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#F0EBE1' }}>
-        <NavbarPublic />
+        <Header />
         <p className="text-gray-500 mt-20">Sous-espèce introuvable.</p>
         <Link to={`/fiches-especes/${id}`} className="mt-4 text-sm font-bold hover:underline" style={{ color: '#3A5220' }}>
           ← Retour à la fiche {espece?.nom}
@@ -78,7 +78,7 @@ export default function SousEspeceDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Nunito', sans-serif" }}>
-      <NavbarPublic />
+      <Header />
 
       {/* ── Hero ──────────────────────────────────────────── */}
       <header className="relative flex flex-col items-center justify-center pt-12 pb-0 px-8 text-center"

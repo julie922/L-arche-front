@@ -27,8 +27,7 @@ export default function LoginPage() {
         {/* Tiret bleu décoratif */}
         <div className="w-8 h-[3px] bg-[#4A90D9] rounded-full mb-8" />
 
-        {/* Logo placeholder */}
-        <div className="w-40 h-16 bg-gray-300 rounded-lg mb-8" />
+        <img src="/logo1.png" alt="L'Arche" className="h-16 w-auto mb-8" />
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-sm w-full max-w-[480px] px-10 py-8 mb-6">

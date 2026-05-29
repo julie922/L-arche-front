@@ -4,6 +4,7 @@ import RegisterPage from './pages/RegisterPage'
 import FichesEspecesPage from './pages/FichesEspecesPage'
 import FicheDetailPage from './pages/FicheDetailPage'
 import SousEspeceDetailPage from './pages/SousEspeceDetailPage'
+import ProfilPage from './pages/ProfilPage'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/fiches-especes" element={<FichesEspecesPage />} />
         <Route path="/fiches-especes/:id" element={<FicheDetailPage />} />
         <Route path="/fiches-especes/:id/:sousId" element={<SousEspeceDetailPage />} />
+        <Route path="/profil" element={<ProfilPage />} />
       </Routes>
     </BrowserRouter>
   )

@@ -9,7 +9,7 @@ export default function NavbarPublic() {
     <nav className="w-full bg-white border-b border-gray-100 px-8 h-14 flex items-center justify-between"
       style={{ fontFamily: "'Nunito', sans-serif" }}>
       <Link to="/" className="flex items-center gap-2">
-        <div className="w-24 h-8 bg-gray-200 rounded" />
+        <img src="/logo2.png" alt="L'Arche" className="h-8 w-auto" />
       </Link>
       <div className="flex items-center gap-8">
         <Link to="/" className="text-sm font-semibold text-gray-600 hover:text-[#3A5220] transition-colors">

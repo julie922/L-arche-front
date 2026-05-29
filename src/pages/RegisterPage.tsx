@@ -254,7 +254,7 @@ export default function RegisterPage() {
         {/* ── Étape 1 : Infos ──────────────────────────────────── */}
         {step === 1 && (
           <>
-            <div className="w-40 h-16 bg-gray-300 rounded-lg mb-8" />
+            <img src="/logo1.png" alt="L'Arche" className="h-16 w-auto mb-8" />
             <div className="bg-white rounded-2xl shadow-sm w-full max-w-[520px] overflow-hidden">
               <div className="px-10 py-8">
                 <div className="text-center mb-8">

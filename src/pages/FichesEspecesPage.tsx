@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import NavbarPublic from '../components/NavbarPublic'
+import Header from '../components/Header'
 import { ESPECES, CATEGORIES } from '../data/especes'
 
 const HERO_EMOJIS = ['🐕', '🐈', '🐇', '🐹']
@@ -35,7 +35,7 @@ export default function FichesEspecesPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Nunito', sans-serif" }}>
-      <NavbarPublic />
+      <Header />
 
       {/* ── Hero ──────────────────────────────────────────── */}
       <header className="relative flex flex-col items-center justify-center pt-16 pb-0 px-8 text-center"
