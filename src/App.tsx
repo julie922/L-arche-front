@@ -11,6 +11,9 @@ import RechercheGardiensPage from './pages/RechercheGardiensPage'
 import DashboardGardienPage from './pages/DashboardGardienPage'
 import DashboardProprioPage from './pages/DashboardProprioPage'
 import FaqPage from './pages/FaqPage'
+import JournalGardienPage from './pages/JournalGardienPage'
+import JournalProprioPage from './pages/JournalProprioPage'
+import FinDeGardePage from './pages/FinDeGardePage'
 
 function App() {
   return (
@@ -26,6 +29,9 @@ function App() {
         <Route path="/dashboard" element={<DashboardGardienPage />} />
         <Route path="/dashboard-proprio" element={<DashboardProprioPage />} />
         <Route path="/faq" element={<FaqPage />} />
+        <Route path="/garde/:gardeId/journal" element={<JournalGardienPage />} />
+        <Route path="/garde/:gardeId/suivi"   element={<JournalProprioPage />} />
+        <Route path="/garde/:gardeId/fin"     element={<FinDeGardePage />} />
         <Route path="/gardiens" element={<RechercheGardiensPage />} />
         <Route path="/gardiens/:id" element={<GardienProfilPage />} />
         <Route path="/gardiens/:id/reserver" element={<ReservationPage />} />
