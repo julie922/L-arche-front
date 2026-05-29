@@ -21,7 +21,7 @@ export default function Header({ isConnected = false }: HeaderProps) {
     >
       {/* Logo */}
       <Link to="/" className="flex items-center">
-        <img src="/logo2.png" alt="L'Arche" className="h-8 w-auto" />
+        <img src="/logo1.png" alt="L'Arche" className="h-8 w-auto" />
       </Link>
 
       {/* Liens de navigation */}

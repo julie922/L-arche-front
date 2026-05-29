@@ -16,12 +16,13 @@ const ESPECES_LIST = ['Chien', 'Chat', 'Lapin', 'Oiseau', 'Rongeur', 'Reptile', 
 
 interface Animal {
   id: number; nom: string; espece: string; race: string; age: string
-  poids: string; sexe: string; caracteres: string[]; besoins: string; photo: File | null
+  poids: string; sexe: string; caracteres: string[]; besoins: string
+  veto: string; telVeto: string; photo: File | null
 }
 
 const EMPTY_ANIMAL = (): Animal => ({
   id: Date.now(), nom: '', espece: '', race: '', age: '', poids: '',
-  sexe: '', caracteres: [], besoins: '', photo: null,
+  sexe: '', caracteres: [], besoins: '', veto: '', telVeto: '', photo: null,
 })
 
 // ─── Toggle ──────────────────────────────────────────────────────────────────
@@ -111,6 +112,17 @@ function AnimalForm({ initial, onSave, onCancel }: {
       <div className="flex flex-col gap-1">
         <label className="text-sm font-bold text-gray-800">Besoins spécifiques</label>
         <textarea rows={2} className={inputCls + ' resize-none'} placeholder="Régime alimentaire, médicaments, phobies..." value={a.besoins} onChange={e => setA({ ...a, besoins: e.target.value })} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-bold text-gray-800">Vétérinaire</label>
+          <input className={inputCls} placeholder="Dr Rousseau" value={a.veto} onChange={e => setA({ ...a, veto: e.target.value })} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-bold text-gray-800">Téléphone véto</label>
+          <input type="tel" className={inputCls} placeholder="04 72 00 00 00" value={a.telVeto} onChange={e => setA({ ...a, telVeto: e.target.value })} />
+        </div>
       </div>
 
       <div className="flex gap-3 mt-1">
@@ -283,6 +295,11 @@ export default function ProfilPage() {
                         <div className="flex gap-1 flex-wrap mt-1.5">
                           {a.caracteres.map(c => <span key={c} className="text-xs px-2 py-0.5 rounded-full bg-[#E8F0DC] text-[#3A5220] font-semibold">{c}</span>)}
                         </div>
+                      )}
+                      {a.veto && (
+                        <p className="text-xs text-gray-400 mt-1.5">
+                          🏥 {a.veto}{a.telVeto ? ` · ${a.telVeto}` : ''}
+                        </p>
                       )}
                     </div>
                     <div className="flex gap-2 shrink-0">
