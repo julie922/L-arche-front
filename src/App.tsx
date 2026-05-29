@@ -9,6 +9,7 @@ import GardienProfilPage from './pages/GardienProfilPage'
 import ReservationPage from './pages/ReservationPage'
 import RechercheGardiensPage from './pages/RechercheGardiensPage'
 import DashboardGardienPage from './pages/DashboardGardienPage'
+import DashboardProprioPage from './pages/DashboardProprioPage'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/fiches-especes/:id/:sousId" element={<SousEspeceDetailPage />} />
         <Route path="/profil" element={<ProfilPage />} />
         <Route path="/dashboard" element={<DashboardGardienPage />} />
+        <Route path="/dashboard-proprio" element={<DashboardProprioPage />} />
         <Route path="/gardiens" element={<RechercheGardiensPage />} />
         <Route path="/gardiens/:id" element={<GardienProfilPage />} />
         <Route path="/gardiens/:id/reserver" element={<ReservationPage />} />
