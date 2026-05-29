@@ -14,6 +14,14 @@ import FaqPage from './pages/FaqPage'
 import JournalGardienPage from './pages/JournalGardienPage'
 import JournalProprioPage from './pages/JournalProprioPage'
 import FinDeGardePage from './pages/FinDeGardePage'
+import AdminGuard from './components/admin/AdminGuard'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminUtilisateurs from './pages/admin/AdminUtilisateurs'
+import AdminVerifications from './pages/admin/AdminVerifications'
+import AdminGardes from './pages/admin/AdminGardes'
+import AdminSignalements from './pages/admin/AdminSignalements'
+import AdminAvis from './pages/admin/AdminAvis'
+import AdminEspeces from './pages/admin/AdminEspeces'
 
 function App() {
   return (
@@ -35,6 +43,13 @@ function App() {
         <Route path="/gardiens" element={<RechercheGardiensPage />} />
         <Route path="/gardiens/:id" element={<GardienProfilPage />} />
         <Route path="/gardiens/:id/reserver" element={<ReservationPage />} />
+        <Route path="/admin"                element={<AdminGuard><AdminDashboard /></AdminGuard>} />
+        <Route path="/admin/utilisateurs"   element={<AdminGuard><AdminUtilisateurs /></AdminGuard>} />
+        <Route path="/admin/verifications"  element={<AdminGuard><AdminVerifications /></AdminGuard>} />
+        <Route path="/admin/gardes"         element={<AdminGuard><AdminGardes /></AdminGuard>} />
+        <Route path="/admin/signalements"   element={<AdminGuard><AdminSignalements /></AdminGuard>} />
+        <Route path="/admin/avis"           element={<AdminGuard><AdminAvis /></AdminGuard>} />
+        <Route path="/admin/especes"        element={<AdminGuard><AdminEspeces /></AdminGuard>} />
       </Routes>
     </BrowserRouter>
   )
