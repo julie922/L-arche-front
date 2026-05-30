@@ -18,6 +18,19 @@ import JournalProprioPage from './pages/JournalProprioPage'
 import FinDeGardePage from './pages/FinDeGardePage'
 import AdminGuard from './components/admin/AdminGuard'
 import PrivateRoute from './components/PrivateRoute'
+import JeuxPage from './pages/JeuxPage'
+import MemoryGame from './pages/jeux/MemoryGame'
+import SoinGame from './pages/jeux/SoinGame'
+import AssociationsGame from './pages/jeux/AssociationsGame'
+import VraiFauxGame from './pages/jeux/VraiFauxGame'
+import QuizGame from './pages/jeux/QuizGame'
+import MotCacheGame from './pages/jeux/MotCacheGame'
+import SpeedquizGame from './pages/jeux/SpeedquizGame'
+import QuiSuisJeGame from './pages/jeux/QuiSuisJeGame'
+import QuizAnimauxGame from './pages/jeux/QuizAnimauxGame'
+import DevietteGame from './pages/jeux/DevietteGame'
+import PuzzleGame from './pages/jeux/PuzzleGame'
+import TriGame from './pages/jeux/TriGame'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminUtilisateurs from './pages/admin/AdminUtilisateurs'
 import AdminVerifications from './pages/admin/AdminVerifications'
@@ -60,6 +73,19 @@ function App() {
         <Route path="/admin/commandes"       element={<AdminGuard><AdminCommandes /></AdminGuard>} />
         <Route path="/merch"                 element={<MerchPage />} />
         <Route path="/messages"              element={<MessageriePage />} />
+        <Route path="/jeux"                  element={<JeuxPage />} />
+        <Route path="/jeux/memory"           element={<MemoryGame />} />
+        <Route path="/jeux/soin"             element={<SoinGame />} />
+        <Route path="/jeux/associations"     element={<AssociationsGame />} />
+        <Route path="/jeux/vrai-faux"        element={<VraiFauxGame />} />
+        <Route path="/jeux/quiz"             element={<QuizGame />} />
+        <Route path="/jeux/mot-cache"        element={<MotCacheGame />} />
+        <Route path="/jeux/speedquiz"        element={<SpeedquizGame />} />
+        <Route path="/jeux/qui-suis-je"      element={<QuiSuisJeGame />} />
+        <Route path="/jeux/quiz-animaux"     element={<QuizAnimauxGame />} />
+        <Route path="/jeux/devinette"        element={<DevietteGame />} />
+        <Route path="/jeux/puzzle"           element={<PuzzleGame />} />
+        <Route path="/jeux/tri"              element={<TriGame />} />
       </Routes>
     </BrowserRouter>
   )

@@ -30,6 +30,7 @@ export default function Header({ isConnected = false }: HeaderProps) {
         <Link to="/fiches-especes" className={linkCls('/fiches-especes')}>Fiches espèces</Link>
         <Link to="/gardiens"       className={linkCls('/gardiens')}>Trouver un gardien</Link>
         <Link to="/faq"            className={linkCls('/faq')}>Aide</Link>
+        <Link to="/jeux"           className={linkCls('/jeux')}>Jeux</Link>
       </div>
 
       {/* Actions */}
