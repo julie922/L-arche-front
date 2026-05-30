@@ -7,7 +7,9 @@ const NAV = [
   { path: '/admin/gardes',        icon: '🐾', label: 'Gardes en cours' },
   { path: '/admin/signalements',  icon: '⚠️', label: 'Signalements',   badge: 2  },
   { path: '/admin/avis',          icon: '⭐', label: 'Avis'            },
-  { path: '/admin/especes',       icon: '🦎', label: 'Espèces'         },
+  { path: '/admin/especes',        icon: '🦎', label: 'Espèces'          },
+  { path: '/admin/merch',          icon: '🛍️', label: 'Produits'         },
+  { path: '/admin/commandes',      icon: '📦', label: 'Commandes'        },
 ]
 
 export default function AdminLayout({ children, title }: { children: React.ReactNode; title: string }) {

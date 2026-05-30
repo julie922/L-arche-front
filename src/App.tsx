@@ -22,6 +22,9 @@ import AdminGardes from './pages/admin/AdminGardes'
 import AdminSignalements from './pages/admin/AdminSignalements'
 import AdminAvis from './pages/admin/AdminAvis'
 import AdminEspeces from './pages/admin/AdminEspeces'
+import AdminMerch from './pages/admin/AdminMerch'
+import AdminCommandes from './pages/admin/AdminCommandes'
+import MerchPage from './pages/MerchPage'
 
 function App() {
   return (
@@ -49,7 +52,10 @@ function App() {
         <Route path="/admin/gardes"         element={<AdminGuard><AdminGardes /></AdminGuard>} />
         <Route path="/admin/signalements"   element={<AdminGuard><AdminSignalements /></AdminGuard>} />
         <Route path="/admin/avis"           element={<AdminGuard><AdminAvis /></AdminGuard>} />
-        <Route path="/admin/especes"        element={<AdminGuard><AdminEspeces /></AdminGuard>} />
+        <Route path="/admin/especes"          element={<AdminGuard><AdminEspeces /></AdminGuard>} />
+        <Route path="/admin/merch"           element={<AdminGuard><AdminMerch /></AdminGuard>} />
+        <Route path="/admin/commandes"       element={<AdminGuard><AdminCommandes /></AdminGuard>} />
+        <Route path="/merch"                 element={<MerchPage />} />
       </Routes>
     </BrowserRouter>
   )
