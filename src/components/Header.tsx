@@ -16,7 +16,7 @@ export default function Header({ isConnected = false }: HeaderProps) {
 
   return (
     <nav
-      className="w-full bg-white border-b border-gray-100 px-8 h-14 flex items-center justify-between shrink-0"
+      className="w-full bg-white border-b border-gray-100 px-8 h-14 flex items-center justify-between shrink-0 sticky top-0 z-40"
       style={{ fontFamily: "'Nunito', sans-serif" }}
     >
       {/* Logo */}
@@ -26,8 +26,10 @@ export default function Header({ isConnected = false }: HeaderProps) {
 
       {/* Liens de navigation */}
       <div className="flex items-center gap-8">
-        <Link to="/" className={linkCls('/')}>Accueil</Link>
+        <Link to="/"               className={linkCls('/')}>Accueil</Link>
         <Link to="/fiches-especes" className={linkCls('/fiches-especes')}>Fiches espèces</Link>
+        <Link to="/gardiens"       className={linkCls('/gardiens')}>Trouver un gardien</Link>
+        <Link to="/faq"            className={linkCls('/faq')}>Aide</Link>
       </div>
 
       {/* Actions */}

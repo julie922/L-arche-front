@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import Header from '../components/Header'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Demande {
@@ -14,7 +15,6 @@ interface Demande {
 
 // ─── Mock données ─────────────────────────────────────────────────────────────
 const MOCK_GARDIEN_NOM = 'Jules'
-const MOCK_NB_MESSAGES = 3
 
 const MOCK_DEMANDES: Demande[] = [
   { id: 1, proprietaire: { nom: 'Camille R.', avatar: null }, animal: { nom: 'Luna',  race: 'Border Collie', avatar: null }, dateDebut: '2025-03-10', dateFin: '2025-03-17', typeGarde: 'Garde à domicile', statut: 'en_attente' },
@@ -183,23 +183,7 @@ export default function DashboardGardienPage() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
 
       {/* Navbar connectée */}
-      <nav className="w-full bg-white border-b border-gray-100 px-8 h-14 flex items-center justify-between shrink-0">
-        <Link to="/"><img src="/logo1.png" alt="L'Arche" className="h-8 w-auto" /></Link>
-        <div className="flex items-center gap-8">
-          <Link to="/" className="text-sm font-semibold text-gray-500 hover:text-[#3A5220] transition-colors">Accueil</Link>
-          <Link to="/dashboard" className="text-sm font-black text-[#3A5220]">Mes gardes</Link>
-          <Link to="/messages" className="text-sm font-semibold text-gray-500 hover:text-[#3A5220] transition-colors flex items-center gap-1.5">
-            Messages
-            {MOCK_NB_MESSAGES > 0 && (
-              <span className="text-xs font-black text-white px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#D91B5C' }}>
-                {MOCK_NB_MESSAGES}
-              </span>
-            )}
-          </Link>
-          <Link to="/profil" className="text-sm font-semibold text-gray-500 hover:text-[#3A5220] transition-colors">Mon profil</Link>
-        </div>
-        <div className="w-24" /> {/* spacer */}
-      </nav>
+      <Header isConnected />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-8">
 

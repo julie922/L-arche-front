@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
+import Header from '../components/Header'
 
 // ─── Mock données ─────────────────────────────────────────────────────────────
 const MOCK_USER_NOM = 'Camille'
-const MOCK_NB_MESSAGES = 2
 
 const MOCK_GARDE_EN_COURS = {
   animal:     'Luna',
@@ -47,23 +47,7 @@ export default function DashboardProprioPage() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
 
       {/* Navbar */}
-      <nav className="w-full bg-white border-b border-gray-100 px-8 h-14 flex items-center justify-between shrink-0">
-        <Link to="/"><img src="/logo1.png" alt="L'Arche" className="h-8 w-auto" /></Link>
-        <div className="flex items-center gap-8">
-          <Link to="/" className="text-sm font-semibold text-gray-500 hover:text-[#3A5220] transition-colors">Accueil</Link>
-          <Link to="/dashboard-proprio" className="text-sm font-black text-[#3A5220]">Mon espace</Link>
-          <Link to="/gardiens" className="text-sm font-semibold text-gray-500 hover:text-[#3A5220] transition-colors">Trouver un gardien</Link>
-          <Link to="/messages" className="text-sm font-semibold text-gray-500 hover:text-[#3A5220] transition-colors flex items-center gap-1.5">
-            Messages
-            {MOCK_NB_MESSAGES > 0 && (
-              <span className="text-xs font-black text-white px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#D91B5C' }}>
-                {MOCK_NB_MESSAGES}
-              </span>
-            )}
-          </Link>
-        </div>
-        <div className="w-24" />
-      </nav>
+      <Header isConnected />
 
       <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
 

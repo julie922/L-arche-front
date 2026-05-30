@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import Header from '../components/Header'
 
 const ETAPES = [
   { num: '01', titre: 'Créez votre profil',       desc: 'Inscrivez-vous en 2 minutes, ajoutez vos animaux ou vos disponibilités selon votre rôle.',  icon: '👤' },
@@ -40,18 +41,7 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Nunito', sans-serif" }}>
 
       {/* ── Navbar ──────────────────────────────────────────── */}
-      <nav className="w-full bg-white border-b border-gray-100 px-8 h-14 flex items-center justify-between shrink-0 sticky top-0 z-40">
-        <Link to="/"><img src="/logo1.png" alt="L'Arche" className="h-8 w-auto" /></Link>
-        <div className="flex items-center gap-8">
-          <Link to="/fiches-especes" className="text-sm font-semibold text-gray-600 hover:text-[#3A5220] transition-colors">Fiches espèces</Link>
-          <Link to="/gardiens"       className="text-sm font-semibold text-gray-600 hover:text-[#3A5220] transition-colors">Trouver un gardien</Link>
-          <Link to="/faq"            className="text-sm font-semibold text-gray-600 hover:text-[#3A5220] transition-colors">Aide</Link>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to="/login"    className="px-4 py-2 rounded-lg text-sm font-bold border-2 border-gray-300 text-gray-700 hover:border-[#3A5220] hover:text-[#3A5220] transition-colors">Connexion</Link>
-          <Link to="/register" className="px-4 py-2 rounded-lg text-sm font-bold text-white hover:opacity-90 transition" style={{ backgroundColor: '#3A5220' }}>S'inscrire</Link>
-        </div>
-      </nav>
+      <Header />
 
       {/* ── Hero ────────────────────────────────────────────── */}
       <section className="relative flex flex-col items-center justify-center text-center px-8 pt-20 pb-0" style={{ backgroundColor: '#3A5220', minHeight: '480px' }}>
