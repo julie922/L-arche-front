@@ -1,18 +1,18 @@
 import { Link } from 'react-router-dom'
 
 const ETAPES = [
-  { num: '01', titre: 'Créez votre profil',       desc: 'Inscrivez-vous en 2 minutes, ajoutez vos animaux ou vos disponibilités selon votre rôle.',  icon: '👤' },
-  { num: '02', titre: 'Trouvez le bon gardien',   desc: 'Recherchez par ville, dates et espèce. Consultez les profils vérifiés et les avis de la communauté.', icon: '🔍' },
+  { num: '01', titre: 'Créez votre profil',         desc: 'Inscrivez-vous en 2 minutes, ajoutez vos animaux ou vos disponibilités selon votre rôle.',  icon: '👤' },
+  { num: '02', titre: 'Trouvez le bon gardien',     desc: 'Recherchez par ville, dates et espèce. Consultez les profils vérifiés et les avis de la communauté.', icon: '🔍' },
   { num: '03', titre: 'Partez l\'esprit tranquille', desc: 'Suivez le journal de garde quotidien avec photos. Votre compagnon est entre de bonnes mains.', icon: '🐾' },
 ]
 
 const FEATURES = [
-  { icon: '✅', titre: 'Profils vérifiés',      desc: 'Chaque gardien est vérifié manuellement par notre équipe. Badge officiel L\'Arche garantit la confiance.' },
-  { icon: '📔', titre: 'Journal de garde',       desc: 'Le gardien envoie une mise à jour quotidienne avec photos. Vous suivez votre animal en temps réel.' },
-  { icon: '🌍', titre: 'Communauté locale',      desc: 'Trouvez des gardiens près de chez vous. Construisez des relations de confiance dans votre quartier.' },
-  { icon: '🐾', titre: 'Toutes les espèces',     desc: 'Chiens, chats, lapins, oiseaux, reptiles et NAC. Chaque gardien précise les animaux qu\'il accepte.' },
-  { icon: '💬', titre: 'Messagerie intégrée',    desc: 'Communiquez directement avec le gardien avant, pendant et après la garde.' },
-  { icon: '❤️', titre: 'Gratuit et solidaire',   desc: 'La mise en relation est entièrement gratuite. La rémunération est convenue entre particuliers.' },
+  { icon: '✔', titre: 'Profils vérifiés',     desc: 'Chaque gardien est vérifié manuellement par notre équipe. Badge officiel L\'Arche garantit la confiance.' },
+  { icon: '📋', titre: 'Journal de garde',      desc: 'Le gardien envoie une mise à jour quotidienne avec photos. Vous suivez votre animal en temps réel.' },
+  { icon: '📍', titre: 'Communauté locale',     desc: 'Trouvez des gardiens près de chez vous. Construisez des relations de confiance dans votre quartier.' },
+  { icon: '🐾', titre: 'Toutes les espèces',    desc: 'Chiens, chats, lapins, oiseaux, reptiles et NAC. Chaque gardien précise les animaux qu\'il accepte.' },
+  { icon: '💬', titre: 'Messagerie intégrée',   desc: 'Communiquez directement avec le gardien avant, pendant et après la garde.' },
+  { icon: '★',  titre: 'Gratuit et solidaire',  desc: 'La mise en relation est entièrement gratuite. La rémunération est convenue entre particuliers.' },
 ]
 
 const TEMOIGNAGES = [
@@ -99,7 +99,7 @@ export default function HomePage() {
             { value: '4.8/5',  label: 'satisfaction moyenne',  icon: '⭐' },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <span className="text-3xl">{s.icon}</span>
+              <span className="text-3xl" style={{ filter: 'brightness(0)' }}>{s.icon}</span>
               <p className="text-3xl font-black mt-2 mb-1" style={{ color: '#3A5220' }}>{s.value}</p>
               <p className="text-sm text-gray-500 font-semibold">{s.label}</p>
             </div>
@@ -123,7 +123,7 @@ export default function HomePage() {
               <div key={i} className="flex flex-col items-center text-center relative">
                 <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl mb-4 shadow-sm relative z-10"
                   style={{ backgroundColor: '#3A5220' }}>
-                  <span>{e.icon}</span>
+                  <span style={{ filter: 'brightness(0) invert(1)' }}>{e.icon}</span>
                 </div>
                 <span className="text-xs font-black tracking-widest mb-1" style={{ color: '#A8C539' }}>{e.num}</span>
                 <h3 className="text-base font-black text-gray-900 mb-2">{e.titre}</h3>
@@ -157,7 +157,7 @@ export default function HomePage() {
           <div className="grid grid-cols-3 gap-5">
             {FEATURES.map(f => (
               <div key={f.titre} className="bg-white/10 rounded-2xl p-5 border border-white/10 hover:bg-white/15 transition-colors">
-                <span className="text-2xl mb-3 block">{f.icon}</span>
+                <span className="text-2xl mb-3 block" style={{ filter: 'brightness(0) invert(1)' }}>{f.icon}</span>
                 <h3 className="text-sm font-black text-white mb-1">{f.titre}</h3>
                 <p className="text-xs text-white/70 leading-relaxed">{f.desc}</p>
               </div>
@@ -200,13 +200,13 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             {[
-              { value: '2021',   label: 'Année de création',  icon: '🏛️' },
-              { value: 'Lyon',   label: 'Basée à',            icon: '📍' },
-              { value: '100%',   label: 'Gratuit',            icon: '💚' },
-              { value: 'Bénévoles', label: 'Équipe',          icon: '🤝' },
+              { value: '2021',      label: 'Année de création', icon: '🏛️' },
+              { value: 'Lyon',      label: 'Basée à',           icon: '📍' },
+              { value: '100%',      label: 'Gratuit',           icon: '💚' },
+              { value: 'Bénévoles', label: 'Équipe',            icon: '🤝' },
             ].map(s => (
               <div key={s.label} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col items-center text-center gap-1">
-                <span className="text-2xl">{s.icon}</span>
+                <span className="text-2xl" style={{ filter: 'brightness(0)' }}>{s.icon}</span>
                 <p className="font-black text-gray-900">{s.value}</p>
                 <p className="text-xs text-gray-400">{s.label}</p>
               </div>
@@ -257,12 +257,12 @@ export default function HomePage() {
             <Link to="/register?role=proprio"
               className="px-8 py-4 rounded-xl font-black text-white text-sm hover:opacity-90 transition"
               style={{ backgroundColor: '#3A5220' }}>
-              🐾 Je cherche un gardien
+              Je cherche un gardien →
             </Link>
             <Link to="/register?role=gardien"
               className="px-8 py-4 rounded-xl font-black text-sm border-2 hover:bg-white transition"
               style={{ borderColor: '#3A5220', color: '#3A5220' }}>
-              🏠 Je propose mes services
+              Je propose mes services
             </Link>
           </div>
         </div>
