@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import Header from '../components/Header'
 
 // ─── Données FAQ ──────────────────────────────────────────────────────────────
 const CATEGORIES = ['Tous', 'Inscription', 'Gardes', 'Paiement', 'Sécurité', 'Animaux', 'Technique']
@@ -103,14 +103,7 @@ export default function FaqPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Nunito', sans-serif" }}>
 
-      {/* Navbar */}
-      <nav className="w-full bg-white border-b border-gray-100 px-8 h-14 flex items-center justify-between shrink-0">
-        <Link to="/"><img src="/logo1.png" alt="L'Arche" className="h-8 w-auto" /></Link>
-        <div className="flex items-center gap-8">
-          <Link to="/" className="text-sm font-semibold text-gray-500 hover:text-[#3A5220] transition-colors">Accueil</Link>
-          <Link to="/faq" className="text-sm font-black text-[#3A5220]">FAQ</Link>
-        </div>
-      </nav>
+      <Header />
 
       {/* Hero */}
       <section className="px-4 pt-14 pb-10 flex flex-col items-center text-center" style={{ backgroundColor: '#F0EBE1' }}>

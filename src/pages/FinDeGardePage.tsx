@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import Header from '../components/Header'
 
 const MOCK_GARDE = {
   id: '1',
@@ -54,9 +54,7 @@ export default function FinDeGardePage() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
 
       {/* Navbar minimale */}
-      <nav className="w-full bg-white border-b border-gray-100 px-8 h-14 flex items-center">
-        <Link to="/"><img src="/logo1.png" alt="L'Arche" className="h-8 w-auto" /></Link>
-      </nav>
+      <Header isConnected />
 
       <main className="flex-1 flex flex-col items-center px-4 py-10">
 

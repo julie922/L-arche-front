@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import Header from '../components/Header'
 
 const MOCK_JOURNAL = {
   animal:   { nom: 'Luna', race: 'Border Collie', emoji: '🐕' },
@@ -42,17 +43,7 @@ export default function JournalProprioPage() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
 
       {/* Navbar */}
-      <nav className="w-full bg-white border-b border-gray-100 px-8 h-14 flex items-center justify-between shrink-0">
-        <Link to="/"><img src="/logo1.png" alt="L'Arche" className="h-8 w-auto" /></Link>
-        <div className="flex items-center gap-6">
-          <Link to="/dashboard-proprio" className="text-sm font-semibold text-gray-500 hover:text-[#3A5220] transition-colors">
-            ← Dashboard
-          </Link>
-          <Link to="/messages" className="text-sm font-semibold text-gray-500 hover:text-[#3A5220] transition-colors">
-            Messagerie
-          </Link>
-        </div>
-      </nav>
+      <Header isConnected />
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
 

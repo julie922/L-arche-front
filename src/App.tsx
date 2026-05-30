@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
+import MessageriePage from './pages/MessageriePage'
 import RegisterPage from './pages/RegisterPage'
 import FichesEspecesPage from './pages/FichesEspecesPage'
 import FicheDetailPage from './pages/FicheDetailPage'
@@ -16,6 +17,7 @@ import JournalGardienPage from './pages/JournalGardienPage'
 import JournalProprioPage from './pages/JournalProprioPage'
 import FinDeGardePage from './pages/FinDeGardePage'
 import AdminGuard from './components/admin/AdminGuard'
+import PrivateRoute from './components/PrivateRoute'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminUtilisateurs from './pages/admin/AdminUtilisateurs'
 import AdminVerifications from './pages/admin/AdminVerifications'
@@ -37,7 +39,7 @@ function App() {
         <Route path="/fiches-especes" element={<FichesEspecesPage />} />
         <Route path="/fiches-especes/:id" element={<FicheDetailPage />} />
         <Route path="/fiches-especes/:id/:sousId" element={<SousEspeceDetailPage />} />
-        <Route path="/profil" element={<ProfilPage />} />
+        <Route path="/profil" element={<PrivateRoute><ProfilPage /></PrivateRoute>} />
         <Route path="/dashboard" element={<DashboardGardienPage />} />
         <Route path="/dashboard-proprio" element={<DashboardProprioPage />} />
         <Route path="/faq" element={<FaqPage />} />
@@ -57,6 +59,7 @@ function App() {
         <Route path="/admin/merch"           element={<AdminGuard><AdminMerch /></AdminGuard>} />
         <Route path="/admin/commandes"       element={<AdminGuard><AdminCommandes /></AdminGuard>} />
         <Route path="/merch"                 element={<MerchPage />} />
+        <Route path="/messages"              element={<MessageriePage />} />
       </Routes>
     </BrowserRouter>
   )
