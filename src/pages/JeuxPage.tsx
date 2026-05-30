@@ -120,13 +120,13 @@ export default function JeuxPage() {
 
       {/* Hero */}
       <section className="px-8 pt-14 pb-10 text-center" style={{ backgroundColor: '#3A5220' }}>
-        <p className="text-4xl mb-3">🐾🎮🐾</p>
-        <h1 className="text-4xl font-black text-white mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <p className="text-xs font-black tracking-widest mb-4" style={{ color: '#A8C539' }}>ASSOCIATION L'ARCHE</p>
+        <h1 className="text-5xl font-black text-white mb-4 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
           Les jeux de L'Arche
         </h1>
-        <p className="text-white/80 text-base max-w-lg mx-auto">
+        <p className="text-white/70 text-base max-w-md mx-auto leading-relaxed">
           Joue et apprends à prendre soin des animaux.<br />
-          Parce que chaque animal mérite d'être heureux ! 🐕🐈🐇
+          Parce que chaque animal mérite d'être heureux.
         </p>
       </section>
 
