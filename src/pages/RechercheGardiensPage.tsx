@@ -174,7 +174,7 @@ export default function RechercheGardiensPage() {
 
                   {/* Photo */}
                   <div className="relative h-36 bg-gray-200">
-                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                    <div className="w-full h-full bg-linear-to-br from-gray-200 to-gray-300 flex items-center justify-center">
                       <span className="text-4xl opacity-30">👤</span>
                     </div>
                     {g.verifie && (
