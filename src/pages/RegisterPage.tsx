@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { api } from '../services/api'
 
 type Role = 'proprio' | 'gardien' | 'les-deux' | null
 
@@ -200,8 +202,12 @@ function CalendarPicker({ selected, onChange, recurring, onRecurringChange }: Ca
 
 // ─── Composant principal ─────────────────────────────────────────────────────
 export default function RegisterPage() {
+  const { login } = useAuth()
+  const navigate = useNavigate()
   const [step, setStep]   = useState(1)
   const [role, setRole]   = useState<Role>(null)
+  const [error, setError]           = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [infos, setInfos] = useState({ firstName: '', lastName: '', email: '', password: '', cgu: false })
   const [animaux, setAnimaux] = useState<Animal[]>([{ ...EMPTY_ANIMAL }])
@@ -233,9 +239,64 @@ export default function RegisterPage() {
   const addAnimal    = () => setAnimaux(prev => [...prev, { ...EMPTY_ANIMAL }])
   const removeAnimal = (i: number) => setAnimaux(prev => prev.filter((_, idx) => idx !== i))
 
-  const handleFinalSubmit = (e: { preventDefault: () => void }) => {
+  const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: appel API
+    setError('')
+    setIsSubmitting(true)
+    try {
+      // 1. Créer le compte
+      await api.post('/auth/signup', {
+        email: infos.email,
+        password: infos.password,
+        nom: infos.lastName,
+        prenom: infos.firstName,
+      })
+
+      // 2. Se connecter pour obtenir les tokens
+      await login(infos.email, infos.password)
+
+      // 3. Mettre à jour le profil (charte + rôle gardien + expérience)
+      const profileUpdate: Record<string, unknown> = {
+        charte_acceptee: true,
+        est_gardien: role === 'gardien' || role === 'les-deux',
+      }
+      if (role === 'gardien' || role === 'les-deux') {
+        if (experience.bio) profileUpdate.description_gardien = experience.bio
+        if (experience.niveau && experience.annees)
+          profileUpdate.experience_animaux = `${experience.niveau} — ${experience.annees} ans`
+        if (experience.animauxGardes.length)
+          profileUpdate.animaux_acceptes = experience.animauxGardes.map(a => a.toLowerCase())
+        const activeGardeTypes = Object.entries(gardeTypes)
+          .filter(([, v]) => v).map(([k]) => k)
+        if (activeGardeTypes.length) profileUpdate.type_de_garde = activeGardeTypes
+      }
+      await api.patch('/users/me', profileUpdate)
+
+      // 4. Créer les animaux (si propriétaire ou les deux)
+      if (role === 'proprio' || role === 'les-deux') {
+        for (const animal of animaux) {
+          if (!animal.nom || !animal.espece) continue
+          await api.post('/animals', {
+            nom: animal.nom,
+            espece: animal.espece.toLowerCase(),
+            race: animal.race || null,
+            age: animal.age ? parseInt(animal.age) || null : null,
+            poids: animal.poids ? parseFloat(animal.poids) || null : null,
+            sexe: animal.sexe || null,
+            caractere: animal.caracteres.length ? animal.caracteres.join(', ') : null,
+            besoins_specifiques: animal.besoins || null,
+          })
+        }
+      }
+
+      // 5. Redirection selon le rôle
+      if (role === 'gardien') navigate('/dashboard')
+      else navigate('/dashboard-proprio')
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors de l'inscription")
+      setIsSubmitting(false)
+    }
   }
 
   // Formulaire commun label + input
@@ -513,6 +574,11 @@ export default function RegisterPage() {
             <h1 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Vérification</h1>
             <p className="text-sm text-gray-500 mb-6">Vérifiez vos informations avant de valider</p>
             <form onSubmit={handleFinalSubmit} className="flex flex-col gap-5">
+              {error && (
+                <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
               <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 space-y-2">
                 <p><span className="font-bold">Nom :</span> {infos.firstName} {infos.lastName}</p>
                 <p><span className="font-bold">Email :</span> {infos.email}</p>
@@ -524,8 +590,8 @@ export default function RegisterPage() {
               </div>
               <div className="flex gap-3">
                 <button type="button" onClick={goBack} className="px-6 py-3 rounded-xl border-2 border-gray-800 text-gray-800 font-bold text-sm hover:bg-gray-50 transition">← Retour</button>
-                <button type="submit" className="flex-1 py-3 rounded-xl font-bold text-white text-sm hover:opacity-90 transition" style={{ backgroundColor: '#3A5220' }}>
-                  Valider mon inscription →
+                <button type="submit" disabled={isSubmitting} className="flex-1 py-3 rounded-xl font-bold text-white text-sm hover:opacity-90 transition disabled:opacity-50" style={{ backgroundColor: '#3A5220' }}>
+                  {isSubmitting ? 'Inscription...' : 'Valider mon inscription →'}
                 </button>
               </div>
             </form>

@@ -1,13 +1,28 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function LoginPage() {
+  const { login } = useAuth()
+  const navigate = useNavigate()
   const [rememberMe, setRememberMe] = useState(false)
   const [form, setForm] = useState({ email: '', password: '' })
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: appel API
+    setError('')
+    setIsSubmitting(true)
+    try {
+      const me = await login(form.email, form.password)
+      if (me.role === 'admin') navigate('/admin')
+      else if (me.est_gardien) navigate('/dashboard')
+      else navigate('/dashboard-proprio')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Identifiants incorrects')
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -47,6 +62,12 @@ export default function LoginPage() {
             </h1>
             <p className="text-sm text-gray-500">Connectez-vous à votre espace de L'Arche</p>
           </div>
+
+          {error && (
+            <div className="mb-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
@@ -99,10 +120,11 @@ export default function LoginPage() {
             {/* Bouton */}
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl font-bold text-white text-base transition-opacity hover:opacity-90"
+              disabled={isSubmitting}
+              className="w-full py-3.5 rounded-xl font-bold text-white text-base transition-opacity hover:opacity-90 disabled:opacity-50"
               style={{ backgroundColor: '#3A5220' }}
             >
-              Se connecter
+              {isSubmitting ? 'Connexion...' : 'Se connecter'}
             </button>
           </form>
         </div>

@@ -1,9 +1,11 @@
-import { Navigate } from 'react-router-dom'
-
-// TODO: remplacer par vérification JWT quand le back sera prêt
-const MOCK_IS_ADMIN = true
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
-  if (!MOCK_IS_ADMIN) return <Navigate to="/login" replace />
-  return <>{children}</>
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+
+  if (isLoading) return null;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <Navigate to="/" replace />;
+  return <>{children}</>;
 }

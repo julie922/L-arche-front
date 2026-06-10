@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 import MessageriePage from './pages/MessageriePage'
@@ -45,6 +46,7 @@ import MerchPage from './pages/MerchPage'
 function App() {
   return (
     <BrowserRouter>
+      <AuthProvider>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -87,6 +89,7 @@ function App() {
         <Route path="/jeux/puzzle"           element={<PuzzleGame />} />
         <Route path="/jeux/tri"              element={<TriGame />} />
       </Routes>
+      </AuthProvider>
     </BrowserRouter>
   )
 }
