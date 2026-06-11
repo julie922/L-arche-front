@@ -36,6 +36,31 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+async function requestMultipart<T>(path: string, formData: FormData): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  const res = await fetch(`${API_BASE}${path}`, { method: 'POST', body: formData, headers });
+  if (res.status === 401) {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    throw new Error('Session expirée, veuillez vous reconnecter');
+  }
+  if (!res.ok) {
+    const payload = await res.json().catch(() => ({})) as Record<string, unknown>;
+    const errObj = payload.error;
+    const errMsg =
+      typeof errObj === 'string' ? errObj
+      : typeof errObj === 'object' && errObj !== null && 'message' in errObj ? String((errObj as Record<string,unknown>).message)
+      : typeof payload.message === 'string' ? payload.message
+      : `Erreur ${res.status}`;
+    throw new Error(errMsg);
+  }
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
+
 export const api = {
   get:    <T>(path: string) =>
     request<T>(path),
@@ -45,4 +70,6 @@ export const api = {
     request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: <T>(path: string) =>
     request<T>(path, { method: 'DELETE' }),
+  postMultipart: <T>(path: string, formData: FormData) =>
+    requestMultipart<T>(path, formData),
 };
