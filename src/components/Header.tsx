@@ -1,11 +1,10 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
-interface HeaderProps {
-  isConnected?: boolean
-}
-
-export default function Header({ isConnected = false }: HeaderProps) {
+export default function Header() {
   const location = useLocation()
+  const navigate  = useNavigate()
+  const { user, logout } = useAuth()
 
   const linkCls = (path: string) =>
     `text-sm font-semibold transition-colors ${
@@ -14,17 +13,24 @@ export default function Header({ isConnected = false }: HeaderProps) {
         : 'text-gray-600 hover:text-[#3A5220]'
     }`
 
+  const handleLogout = async () => {
+    await logout()
+    navigate('/login')
+  }
+
+  const initials = user
+    ? ((user.prenom?.[0] ?? '') + (user.nom?.[0] ?? '')).toUpperCase() || '?'
+    : ''
+
   return (
     <nav
       className="w-full bg-white border-b border-gray-100 px-8 h-14 flex items-center justify-between shrink-0 sticky top-0 z-40"
       style={{ fontFamily: "'Nunito', sans-serif" }}
     >
-      {/* Logo */}
       <Link to="/" className="flex items-center">
         <img src="/logo1.png" alt="L'Arche" className="h-8 w-auto" />
       </Link>
 
-      {/* Liens de navigation */}
       <div className="flex items-center gap-8">
         <Link to="/"               className={linkCls('/')}>Accueil</Link>
         <Link to="/fiches-especes" className={linkCls('/fiches-especes')}>Fiches espèces</Link>
@@ -33,18 +39,32 @@ export default function Header({ isConnected = false }: HeaderProps) {
         <Link to="/jeux"           className={linkCls('/jeux')}>Jeux</Link>
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-3">
-        {isConnected ? (
-          <Link
-            to="/profil"
-            className="flex items-center gap-2 text-sm font-bold hover:text-[#3A5220] transition-colors text-gray-700"
-          >
-            <div className="w-8 h-8 rounded-full bg-[#D4E6C3] flex items-center justify-center text-xs font-black text-[#3A5220]">
-              P
-            </div>
-            Mon profil
-          </Link>
+        {user ? (
+          <>
+            <Link
+              to={user.role === 'admin' ? '/admin' : user.est_gardien ? '/dashboard' : '/dashboard-proprio'}
+              className="flex items-center gap-2 text-sm font-bold hover:text-[#3A5220] transition-colors text-gray-700"
+            >
+              <div className="w-8 h-8 rounded-full bg-[#D4E6C3] flex items-center justify-center text-xs font-black text-[#3A5220]">
+                {initials}
+              </div>
+              {user.prenom || user.nom}
+            </Link>
+            <Link
+              to="/profil"
+              className="text-sm font-semibold text-gray-500 hover:text-[#3A5220] transition-colors"
+            >
+              Profil
+            </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="px-4 py-2 rounded-lg text-sm font-bold border-2 border-gray-200 text-gray-600 hover:border-red-300 hover:text-red-500 transition-colors"
+            >
+              Déconnexion
+            </button>
+          </>
         ) : (
           <>
             <Link

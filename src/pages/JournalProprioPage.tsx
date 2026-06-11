@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom'
+﻿import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 
 const MOCK_JOURNAL = {
-  animal:   { nom: 'Luna', race: 'Border Collie', emoji: '🐕' },
+  animal:   { nom: 'Luna', race: 'Border Collie', emoji: 'ðŸ•' },
   gardien:  { nom: 'Jules Martin', id: 'jules-martin' },
   dateDebut: '10-17 mars 2025',
   entrees: [
@@ -11,8 +11,8 @@ const MOCK_JOURNAL = {
       date: 'Mercredi 12 mars',
       heure: '19:45',
       debutGarde: false,
-      checks: ['Repas matin', 'Repas soir', 'Promenade', 'Médicaments'],
-      humeur: 'Luna est en pleine forme ! Grande balade ce matin au parc, elle a joué avec un autre chien. A bien mangé ses deux repas.',
+      checks: ['Repas matin', 'Repas soir', 'Promenade', 'MÃ©dicaments'],
+      humeur: 'Luna est en pleine forme ! Grande balade ce matin au parc, elle a jouÃ© avec un autre chien. A bien mangÃ© ses deux repas.',
       photos: ['/mock-dog-1.jpg', '/mock-dog-2.jpg', '/mock-dog-3.jpg'],
     },
     {
@@ -20,8 +20,8 @@ const MOCK_JOURNAL = {
       date: 'Mardi 11 mars',
       heure: '20:12',
       debutGarde: false,
-      checks: ['Repas matin', 'Repas soir', 'Promenade', 'Médicaments'],
-      humeur: 'Bonne ! Première journée complète, Luna a un peu cherché ses repères mais s\'est vite installée sur le canapé !',
+      checks: ['Repas matin', 'Repas soir', 'Promenade', 'MÃ©dicaments'],
+      humeur: 'Bonne ! PremiÃ¨re journÃ©e complÃ¨te, Luna a un peu cherchÃ© ses repÃ¨res mais s\'est vite installÃ©e sur le canapÃ© !',
       photos: ['/mock-dog-4.jpg', '/mock-dog-5.jpg', '/mock-dog-6.jpg'],
     },
     {
@@ -30,7 +30,7 @@ const MOCK_JOURNAL = {
       heure: '18:30',
       debutGarde: true,
       checks: [],
-      humeur: 'Luna est arrivée, elle va bien ! On a fait un tour du jardin, elle adore.',
+      humeur: 'Luna est arrivÃ©e, elle va bien ! On a fait un tour du jardin, elle adore.',
       photos: [],
     },
   ],
@@ -43,7 +43,7 @@ export default function JournalProprioPage() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
 
       {/* Navbar */}
-      <Header isConnected />
+      <Header />
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
 
@@ -55,7 +55,7 @@ export default function JournalProprioPage() {
             </div>
             <div>
               <h1 className="text-lg font-black text-white">{j.animal.nom} est entre de bonnes mains</h1>
-              <p className="text-xs text-white/70">Gardée par {j.gardien.nom} · {j.dateDebut}</p>
+              <p className="text-xs text-white/70">GardÃ©e par {j.gardien.nom} Â· {j.dateDebut}</p>
             </div>
           </div>
           <Link to="/messages"
@@ -65,7 +65,7 @@ export default function JournalProprioPage() {
           </Link>
         </div>
 
-        {/* Timeline des entrées */}
+        {/* Timeline des entrÃ©es */}
         <div className="relative flex flex-col gap-6">
           {/* Ligne verticale */}
           <div className="absolute left-2 top-4 bottom-4 w-0.5 bg-gray-200" />
@@ -77,12 +77,12 @@ export default function JournalProprioPage() {
                 style={{ backgroundColor: e.debutGarde ? '#D91B5C' : '#E5E7EB' }} />
 
               <div className="bg-white rounded-2xl border border-gray-100 px-5 py-4">
-                {/* En-tête */}
+                {/* En-tÃªte */}
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-bold text-gray-500">{e.date} · {e.heure}</span>
+                  <span className="text-xs font-bold text-gray-500">{e.date} Â· {e.heure}</span>
                   {e.debutGarde && (
                     <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FCE4EC', color: '#D91B5C' }}>
-                      Début de garde
+                      DÃ©but de garde
                     </span>
                   )}
                 </div>
@@ -122,3 +122,4 @@ export default function JournalProprioPage() {
     </div>
   )
 }
+

@@ -1,9 +1,9 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import Header from '../components/Header'
 
 const MOCK_GARDE = {
   gardeId: '1',
-  animal: { nom: 'Luna', race: 'Border Collie', emoji: '🐕' },
+  animal: { nom: 'Luna', race: 'Border Collie', emoji: 'ðŸ•' },
   proprietaire: 'Camille R.',
   gardien: 'Jules Martin',
   dateDebut: '2025-03-10',
@@ -15,19 +15,19 @@ const MOCK_GARDE = {
 }
 
 const CHECKS = [
-  { id: 'repas_matin', label: 'Repas du matin',  icon: '🦴' },
-  { id: 'repas_soir',  label: 'Repas du soir',   icon: '🦴' },
-  { id: 'promenade',   label: 'Promenade',        icon: '🐾' },
-  { id: 'medicaments', label: 'Médicaments',      icon: '💊' },
-  { id: 'bonne_nuit',  label: 'Bonne nuit',       icon: '🌙' },
+  { id: 'repas_matin', label: 'Repas du matin',  icon: 'ðŸ¦´' },
+  { id: 'repas_soir',  label: 'Repas du soir',   icon: 'ðŸ¦´' },
+  { id: 'promenade',   label: 'Promenade',        icon: 'ðŸ¾' },
+  { id: 'medicaments', label: 'MÃ©dicaments',      icon: 'ðŸ’Š' },
+  { id: 'bonne_nuit',  label: 'Bonne nuit',       icon: 'ðŸŒ™' },
 ]
 
 const HUMEURS = [
-  { value: 5, emoji: '😊', label: 'Excellent' },
-  { value: 4, emoji: '🙂', label: 'Bien' },
-  { value: 3, emoji: '😐', label: 'Moyen' },
-  { value: 2, emoji: '😕', label: 'Pas top' },
-  { value: 1, emoji: '😢', label: 'Difficile' },
+  { value: 5, emoji: 'ðŸ˜Š', label: 'Excellent' },
+  { value: 4, emoji: 'ðŸ™‚', label: 'Bien' },
+  { value: 3, emoji: 'ðŸ˜', label: 'Moyen' },
+  { value: 2, emoji: 'ðŸ˜•', label: 'Pas top' },
+  { value: 1, emoji: 'ðŸ˜¢', label: 'Difficile' },
 ]
 
 export default function JournalGardienPage() {
@@ -54,7 +54,7 @@ export default function JournalGardienPage() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
 
       {/* Navbar */}
-      <Header isConnected />
+      <Header />
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
 
@@ -65,9 +65,9 @@ export default function JournalGardienPage() {
               {g.animal.emoji}
             </div>
             <div>
-              <h1 className="text-lg font-black text-white">{g.animal.nom} — {g.animal.race}</h1>
-              <p className="text-xs text-white/70">Garde de {g.proprietaire} · {g.dateDebut.split('-')[2].replace(/^0/, '')}-{g.dateFin.split('-')[2].replace(/^0/, '')} mars 2025</p>
-              <p className="text-xs text-white/60">Aujourd'hui : {g.dateAujourdHui} · Jour {g.jourActuel}</p>
+              <h1 className="text-lg font-black text-white">{g.animal.nom} â€” {g.animal.race}</h1>
+              <p className="text-xs text-white/70">Garde de {g.proprietaire} Â· {g.dateDebut.split('-')[2].replace(/^0/, '')}-{g.dateFin.split('-')[2].replace(/^0/, '')} mars 2025</p>
+              <p className="text-xs text-white/60">Aujourd'hui : {g.dateAujourdHui} Â· Jour {g.jourActuel}</p>
             </div>
           </div>
           <div className="text-right shrink-0">
@@ -96,7 +96,7 @@ export default function JournalGardienPage() {
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
                       done ? 'text-white' : 'border-2 border-gray-200'
                     }`} style={done ? { backgroundColor: '#D91B5C' } : {}}>
-                      {done && <span className="text-xs">✓</span>}
+                      {done && <span className="text-xs">âœ“</span>}
                     </div>
                   </button>
                 )
@@ -142,7 +142,7 @@ export default function JournalGardienPage() {
                   <img src={URL.createObjectURL(photo)} alt="" className="w-full h-full object-cover" />
                   <button type="button" onClick={() => setPhotos(prev => prev.filter((_, idx) => idx !== i))}
                     className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/50 text-white text-xs flex items-center justify-center">
-                    ×
+                    Ã—
                   </button>
                 </div>
               ))}
@@ -159,10 +159,11 @@ export default function JournalGardienPage() {
           <button type="submit"
             className="w-full py-4 rounded-2xl font-bold text-white text-base hover:opacity-90 transition"
             style={{ backgroundColor: '#3A5220' }}>
-            Envoyer la mise à jour à {g.proprietaire.split(' ')[0]} →
+            Envoyer la mise Ã  jour Ã  {g.proprietaire.split(' ')[0]} â†’
           </button>
         </form>
       </main>
     </div>
   )
 }
+

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import Header from '../components/Header'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -28,11 +29,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Nunito', sans-serif" }}>
 
-      {/* Navbar noire */}
-      <header className="w-full h-16 bg-[#0D0D0D]" />
-
-      {/* Ligne bleue */}
-      <div className="w-full h-[3px] bg-[#4A90D9]" />
+      <Header />
 
       {/* Contenu principal */}
       <main

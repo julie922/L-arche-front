@@ -54,16 +54,16 @@ function App() {
         <Route path="/fiches-especes" element={<FichesEspecesPage />} />
         <Route path="/fiches-especes/:id" element={<FicheDetailPage />} />
         <Route path="/fiches-especes/:id/:sousId" element={<SousEspeceDetailPage />} />
-        <Route path="/profil" element={<PrivateRoute><ProfilPage /></PrivateRoute>} />
-        <Route path="/dashboard" element={<DashboardGardienPage />} />
-        <Route path="/dashboard-proprio" element={<DashboardProprioPage />} />
+        <Route path="/profil"            element={<PrivateRoute><ProfilPage /></PrivateRoute>} />
+        <Route path="/dashboard"         element={<PrivateRoute><DashboardGardienPage /></PrivateRoute>} />
+        <Route path="/dashboard-proprio" element={<PrivateRoute><DashboardProprioPage /></PrivateRoute>} />
         <Route path="/faq" element={<FaqPage />} />
-        <Route path="/garde/:gardeId/journal" element={<JournalGardienPage />} />
-        <Route path="/garde/:gardeId/suivi"   element={<JournalProprioPage />} />
-        <Route path="/garde/:gardeId/fin"     element={<FinDeGardePage />} />
+        <Route path="/garde/:gardeId/journal" element={<PrivateRoute><JournalGardienPage /></PrivateRoute>} />
+        <Route path="/garde/:gardeId/suivi"   element={<PrivateRoute><JournalProprioPage /></PrivateRoute>} />
+        <Route path="/garde/:gardeId/fin"     element={<PrivateRoute><FinDeGardePage /></PrivateRoute>} />
         <Route path="/gardiens" element={<RechercheGardiensPage />} />
         <Route path="/gardiens/:id" element={<GardienProfilPage />} />
-        <Route path="/gardiens/:id/reserver" element={<ReservationPage />} />
+        <Route path="/gardiens/:id/reserver" element={<PrivateRoute><ReservationPage /></PrivateRoute>} />
         <Route path="/admin"                element={<AdminGuard><AdminDashboard /></AdminGuard>} />
         <Route path="/admin/utilisateurs"   element={<AdminGuard><AdminUtilisateurs /></AdminGuard>} />
         <Route path="/admin/verifications"  element={<AdminGuard><AdminVerifications /></AdminGuard>} />

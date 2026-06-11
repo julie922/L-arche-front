@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import Header from '../components/Header'
 
 const MOCK_GARDE = {
@@ -9,13 +9,13 @@ const MOCK_GARDE = {
 }
 
 const CRITERES = [
-  { id: 'communication', label: 'Communication', icon: '💬' },
-  { id: 'ponctualite',   label: 'Ponctualité',   icon: '🕐' },
-  { id: 'soin',          label: "Soin de l'animal", icon: '🐾' },
-  { id: 'logement',      label: 'Logement',       icon: '🏠' },
+  { id: 'communication', label: 'Communication', icon: 'ðŸ’¬' },
+  { id: 'ponctualite',   label: 'PonctualitÃ©',   icon: 'ðŸ•' },
+  { id: 'soin',          label: "Soin de l'animal", icon: 'ðŸ¾' },
+  { id: 'logement',      label: 'Logement',       icon: 'ðŸ ' },
 ]
 
-const ETAPES = ['Compte-rendu', 'Retour confirmé', 'Laisser un avis']
+const ETAPES = ['Compte-rendu', 'Retour confirmÃ©', 'Laisser un avis']
 
 function StarRating({ value, onChange, size = 'lg' }: { value: number; onChange: (n: number) => void; size?: 'sm' | 'lg' }) {
   const [hovered, setHovered] = useState(0)
@@ -28,7 +28,7 @@ function StarRating({ value, onChange, size = 'lg' }: { value: number; onChange:
           onClick={() => onChange(i)}
           className={`transition-transform hover:scale-110 ${size === 'lg' ? 'text-4xl' : 'text-base'}`}
           style={{ color: i <= (hovered || value) ? '#D91B5C' : '#D1D5DB' }}>
-          ★
+          â˜…
         </button>
       ))}
     </div>
@@ -54,20 +54,20 @@ export default function FinDeGardePage() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
 
       {/* Navbar minimale */}
-      <Header isConnected />
+      <Header />
 
       <main className="flex-1 flex flex-col items-center px-4 py-10">
 
-        {/* En-tête */}
+        {/* En-tÃªte */}
         <div className="text-center mb-8">
           <p className="text-xs font-black tracking-widest mb-2" style={{ color: '#5A7A1A' }}>FIN DE GARDE</p>
           <h1 className="text-3xl font-black text-gray-900 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-            {g.animal} est rentrée à la maison
+            {g.animal} est rentrÃ©e Ã  la maison
           </h1>
           <p className="text-sm text-gray-500">Garde du {g.dates} - {g.gardien.nom}</p>
         </div>
 
-        {/* Indicateur d'étapes */}
+        {/* Indicateur d'Ã©tapes */}
         <div className="flex items-start justify-center gap-0 mb-10">
           {ETAPES.map((label, i) => {
             const done   = i < 2
@@ -79,7 +79,7 @@ export default function FinDeGardePage() {
                     done   ? 'text-white' :
                     active ? 'text-white' : 'bg-white border-gray-300 text-gray-400'
                   }`} style={done ? { backgroundColor: '#D91B5C', borderColor: '#D91B5C' } : active ? { backgroundColor: '#3A5220', borderColor: '#3A5220' } : {}}>
-                    {done ? '✓' : i + 1}
+                    {done ? 'âœ“' : i + 1}
                   </div>
                   <span className={`mt-1 text-xs font-semibold ${active ? 'text-gray-800' : done ? 'text-gray-400' : 'text-gray-400'}`}>
                     {label}
@@ -98,7 +98,7 @@ export default function FinDeGardePage() {
           <h2 className="text-xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
             Votre avis sur {g.gardien.prenom}
           </h2>
-          <p className="text-sm text-gray-400 mb-6">Votre retour aide toute la communauté</p>
+          <p className="text-sm text-gray-400 mb-6">Votre retour aide toute la communautÃ©</p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
@@ -107,7 +107,7 @@ export default function FinDeGardePage() {
               <StarRating value={noteGlobale} onChange={setNoteGlobale} size="lg" />
             </div>
 
-            {/* Notes par critère */}
+            {/* Notes par critÃ¨re */}
             <div className="grid grid-cols-2 gap-3">
               {CRITERES.map(c => (
                 <div key={c.id} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
@@ -124,7 +124,7 @@ export default function FinDeGardePage() {
             <div className="flex flex-col gap-1">
               <label className="text-sm font-bold text-gray-800">Votre commentaire</label>
               <textarea rows={4} value={commentaire} onChange={e => setCommentaire(e.target.value)}
-                placeholder={`${g.gardien.prenom} est exceptionnel ! ${g.animal} était aux anges...`}
+                placeholder={`${g.gardien.prenom} est exceptionnel ! ${g.animal} Ã©tait aux anges...`}
                 className="border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#3A5220] focus:border-transparent placeholder-gray-400" />
             </div>
 
@@ -133,7 +133,7 @@ export default function FinDeGardePage() {
               <input type="checkbox" checked={recommande} onChange={e => setRecommande(e.target.checked)}
                 className="w-4 h-4 rounded" style={{ accentColor: '#D91B5C' }} />
               <span className="text-sm font-semibold" style={{ color: '#D91B5C' }}>
-                Je recommande {g.gardien.prenom} à d'autres propriétaires
+                Je recommande {g.gardien.prenom} Ã  d'autres propriÃ©taires
               </span>
             </label>
 
@@ -141,7 +141,7 @@ export default function FinDeGardePage() {
             <button type="submit"
               className="w-full py-3.5 rounded-xl font-bold text-white text-sm hover:opacity-90 transition"
               style={{ backgroundColor: '#3A5220' }}>
-              Publier mon avis →
+              Publier mon avis â†’
             </button>
           </form>
         </div>
@@ -149,3 +149,4 @@ export default function FinDeGardePage() {
     </div>
   )
 }
+

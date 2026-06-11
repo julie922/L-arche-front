@@ -1,41 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
+import { useAuth } from '../contexts/AuthContext'
+import { api } from '../services/api'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface Demande {
-  id: number
-  proprietaire: { nom: string; avatar: string | null }
-  animal: { nom: string; race: string; avatar: string | null }
-  dateDebut: string
-  dateFin: string
-  typeGarde: string
-  statut: 'en_attente' | 'confirmee' | 'refusee' | 'terminee'
+  id: string
+  proprietaire_id: string
+  gardien_id: string
+  animal_id: string
+  date_debut: string
+  date_fin: string
+  statut: 'en_attente' | 'confirmee' | 'refusee' | 'terminee' | 'annulee'
+  instructions: string | null
 }
 
-// ─── Mock données ─────────────────────────────────────────────────────────────
-const MOCK_GARDIEN_NOM = 'Jules'
-
-const MOCK_DEMANDES: Demande[] = [
-  { id: 1, proprietaire: { nom: 'Camille R.', avatar: null }, animal: { nom: 'Luna',  race: 'Border Collie', avatar: null }, dateDebut: '2025-03-10', dateFin: '2025-03-17', typeGarde: 'Garde à domicile', statut: 'en_attente' },
-  { id: 2, proprietaire: { nom: 'Marc L.',    avatar: null }, animal: { nom: 'Mimi',  race: 'Ragdoll',       avatar: null }, dateDebut: '2025-03-20', dateFin: '2025-03-25', typeGarde: 'Garde à domicile', statut: 'en_attente' },
-  { id: 3, proprietaire: { nom: 'Sophie T.',  avatar: null }, animal: { nom: 'Rex',   race: 'Labrador',      avatar: null }, dateDebut: '2025-04-01', dateFin: '2025-04-05', typeGarde: 'Promenade',        statut: 'en_attente' },
-  { id: 4, proprietaire: { nom: 'Paul D.',    avatar: null }, animal: { nom: 'Felix', race: 'Siamois',       avatar: null }, dateDebut: '2025-03-11', dateFin: '2025-03-14', typeGarde: 'Garde à domicile', statut: 'confirmee'  },
-  { id: 5, proprietaire: { nom: 'Lucie M.',   avatar: null }, animal: { nom: 'Bella', race: 'Labrador',      avatar: null }, dateDebut: '2025-03-22', dateFin: '2025-03-26', typeGarde: 'Visite à domicile', statut: 'confirmee' },
-  { id: 6, proprietaire: { nom: 'Thomas B.',  avatar: null }, animal: { nom: 'Max',   race: 'Golden',        avatar: null }, dateDebut: '2025-02-10', dateFin: '2025-02-15', typeGarde: 'Garde à domicile', statut: 'terminee'   },
-]
-
-// Jours avec une garde confirmée
-const GARDES_DATES = new Set([
-  '2025-03-11','2025-03-12','2025-03-13','2025-03-14',
-  '2025-03-22','2025-03-23','2025-03-24','2025-03-25','2025-03-26',
-])
-const DISPOS_DATES = new Set([
-  '2025-03-04','2025-03-05','2025-03-08','2025-03-09','2025-03-10',
-  '2025-03-15','2025-03-16','2025-03-17','2025-03-18','2025-03-19',
-])
-
-// ─── Utilitaires ──────────────────────────────────────────────────────────────
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
@@ -44,19 +23,13 @@ function nbNuits(debut: string, fin: string) {
   return Math.ceil((new Date(fin).getTime() - new Date(debut).getTime()) / 86400000)
 }
 
-function typeIcon(type: string) {
-  if (type === 'Promenade') return '🐾'
-  if (type === 'Visite à domicile') return '🚗'
-  return '🏠'
-}
-
-// ─── Calendrier sidebar ───────────────────────────────────────────────────────
 const MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
 const DAY_LABELS  = ['L','M','M','J','V','S','D']
 
-function CalendarDashboard({ gardes, dispos }: { gardes: Set<string>; dispos: Set<string> }) {
-  const [month, setMonth] = useState(2)
-  const [year,  setYear]  = useState(2025)
+function CalendarDashboard({ gardes }: { gardes: Set<string> }) {
+  const now = new Date()
+  const [month, setMonth] = useState(now.getMonth())
+  const [year,  setYear]  = useState(now.getFullYear())
   const prev = () => { if (month === 0) { setMonth(11); setYear(y => y-1) } else setMonth(m => m-1) }
   const next = () => { if (month === 11) { setMonth(0); setYear(y => y+1) } else setMonth(m => m+1) }
   const firstDay    = new Date(year, month, 1).getDay()
@@ -66,10 +39,10 @@ function CalendarDashboard({ gardes, dispos }: { gardes: Set<string>; dispos: Se
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-4">
       <div className="flex justify-between items-center mb-3">
-        <span className="text-sm font-bold text-gray-800">Disponibilités — {MONTH_NAMES[month]} {year}</span>
+        <span className="text-sm font-bold text-gray-800">{MONTH_NAMES[month]} {year}</span>
         <div className="flex gap-1">
-          <button type="button" onClick={prev} className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 text-xs">‹</button>
-          <button type="button" onClick={next} className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 text-xs">›</button>
+          <button type="button" onClick={prev} className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 text-xs">&#8249;</button>
+          <button type="button" onClick={next} className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 text-xs">&#8250;</button>
         </div>
       </div>
       <div className="grid grid-cols-7 mb-1">
@@ -81,13 +54,10 @@ function CalendarDashboard({ gardes, dispos }: { gardes: Set<string>; dispos: Se
           const day = i + 1
           const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
           const isGarde = gardes.has(key)
-          const isDispo = dispos.has(key)
           return (
             <div key={key}
-              className={`aspect-square rounded-md flex items-center justify-center text-xs font-medium ${
-                isGarde ? 'text-white' : isDispo ? 'text-[#3A5220]' : 'text-gray-400'
-              }`}
-              style={{ backgroundColor: isGarde ? '#3A5220' : isDispo ? '#D4E6C3' : 'transparent' }}>
+              className={`aspect-square rounded-md flex items-center justify-center text-xs font-medium ${isGarde ? 'text-white' : 'text-gray-400'}`}
+              style={{ backgroundColor: isGarde ? '#3A5220' : 'transparent' }}>
               {day}
             </div>
           )
@@ -95,45 +65,35 @@ function CalendarDashboard({ gardes, dispos }: { gardes: Set<string>; dispos: Se
       </div>
       <div className="flex gap-4 mt-3">
         <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#3A5220' }} /><span className="text-xs text-gray-500">Garde</span></div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#D4E6C3' }} /><span className="text-xs text-gray-500">Disponible</span></div>
       </div>
     </div>
   )
 }
 
-// ─── Carte demande ────────────────────────────────────────────────────────────
-function CarteDemandeAttente({ d, onAccepter, onRefuser }: {
-  d: Demande; onAccepter: (id: number) => void; onRefuser: (id: number) => void
+function CarteDemandeAttente({ d, onAccepter, onRefuser, loading }: {
+  d: Demande; onAccepter: (id: string) => void; onRefuser: (id: string) => void; loading: boolean
 }) {
-  const nuits = nbNuits(d.dateDebut, d.dateFin)
+  const nuits = nbNuits(d.date_debut, d.date_fin)
   return (
     <div className="bg-white rounded-2xl border border-gray-100 px-5 py-4 flex items-start gap-4">
-      <div className="flex flex-col gap-1 shrink-0">
-        <div className="w-10 h-10 rounded-full bg-gray-200" />
-        <div className="w-10 h-10 rounded-full bg-[#D4E6C3] flex items-center justify-center text-lg">🐾</div>
-      </div>
+      <div className="w-10 h-10 rounded-full bg-[#D4E6C3] flex items-center justify-center text-lg shrink-0">🐾</div>
       <div className="flex-1 min-w-0">
-        <p className="font-black text-gray-900 text-sm mb-1">
-          {d.proprietaire.nom} — {d.animal.nom} ({d.animal.race})
-        </p>
+        <p className="font-black text-gray-900 text-sm mb-1">Demande #{d.id.slice(0, 8)}</p>
         <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mb-3">
-          <span className="flex items-center gap-1">📅 {formatDate(d.dateDebut).replace(/ \d{4}/, '')} – {formatDate(d.dateFin)}</span>
-          <span className="flex items-center gap-1">{typeIcon(d.typeGarde)} {d.typeGarde} · {nuits} nuit{nuits > 1 ? 's' : ''}</span>
+          <span>📅 {formatDate(d.date_debut).replace(/ \d{4}/, '')} – {formatDate(d.date_fin)}</span>
+          <span>🌙 {nuits} nuit{nuits > 1 ? 's' : ''}</span>
         </div>
+        {d.instructions && <p className="text-xs text-gray-400 mb-3 italic">"{d.instructions}"</p>}
         <div className="flex gap-2">
-          <button type="button" onClick={() => onAccepter(d.id)}
-            className="flex items-center gap-1 px-4 py-1.5 rounded-lg text-xs font-bold text-white hover:opacity-90 transition"
+          <button type="button" onClick={() => onAccepter(d.id)} disabled={loading}
+            className="flex items-center gap-1 px-4 py-1.5 rounded-lg text-xs font-bold text-white hover:opacity-90 transition disabled:opacity-50"
             style={{ backgroundColor: '#D91B5C' }}>
-            ✓ Accepter
+            Accepter
           </button>
-          <button type="button" onClick={() => onRefuser(d.id)}
-            className="px-4 py-1.5 rounded-lg text-xs font-bold border-2 border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+          <button type="button" onClick={() => onRefuser(d.id)} disabled={loading}
+            className="px-4 py-1.5 rounded-lg text-xs font-bold border-2 border-gray-200 text-gray-600 hover:bg-gray-50 transition disabled:opacity-50">
             Refuser
           </button>
-          <Link to={`/demandes/${d.id}`}
-            className="px-4 py-1.5 rounded-lg text-xs font-bold border-2 border-gray-200 text-gray-600 hover:bg-gray-50 transition">
-            Voir les détails
-          </Link>
         </div>
       </div>
     </div>
@@ -141,92 +101,137 @@ function CarteDemandeAttente({ d, onAccepter, onRefuser }: {
 }
 
 function CarteConfirmee({ d }: { d: Demande }) {
-  const nuits = nbNuits(d.dateDebut, d.dateFin)
+  const nuits = nbNuits(d.date_debut, d.date_fin)
   return (
     <div className="bg-white rounded-2xl border border-gray-100 px-5 py-4 flex items-start gap-4">
-      <div className="flex flex-col gap-1 shrink-0">
-        <div className="w-10 h-10 rounded-full bg-gray-200" />
-        <div className="w-10 h-10 rounded-full bg-[#D4E6C3] flex items-center justify-center text-lg">🐾</div>
-      </div>
+      <div className="w-10 h-10 rounded-full bg-[#D4E6C3] flex items-center justify-center text-lg shrink-0">🐾</div>
       <div className="flex-1">
-        <p className="font-black text-gray-900 text-sm mb-1">
-          {d.proprietaire.nom} — {d.animal.nom} ({d.animal.race})
-        </p>
+        <p className="font-black text-gray-900 text-sm mb-1">Garde #{d.id.slice(0, 8)}</p>
         <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mb-2">
-          <span>📅 {formatDate(d.dateDebut).replace(/ \d{4}/, '')} – {formatDate(d.dateFin)}</span>
-          <span>{typeIcon(d.typeGarde)} {d.typeGarde} · {nuits} nuit{nuits > 1 ? 's' : ''}</span>
+          <span>📅 {formatDate(d.date_debut).replace(/ \d{4}/, '')} – {formatDate(d.date_fin)}</span>
+          <span>🌙 {nuits} nuit{nuits > 1 ? 's' : ''}</span>
         </div>
-        <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ backgroundColor: '#D4E6C3', color: '#3A5220' }}>
-          ✓ Confirmée
-        </span>
+        <div className="flex gap-2 items-center">
+          <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ backgroundColor: '#D4E6C3', color: '#3A5220' }}>
+            Confirmée
+          </span>
+          <Link to={`/garde/${d.id}/journal`}
+            className="text-xs font-bold px-3 py-1 rounded-full border-2 hover:bg-gray-50 transition border-gray-200 text-gray-600">
+            Journal
+          </Link>
+        </div>
       </div>
     </div>
   )
 }
 
-// ─── Page principale ──────────────────────────────────────────────────────────
 export default function DashboardGardienPage() {
-  const [tab, setTab] = useState<'demandes' | 'confirmees' | 'historique'>('demandes')
-  const [demandes, setDemandes] = useState<Demande[]>(MOCK_DEMANDES)
+  const { user } = useAuth()
+  const [tab, setTab]             = useState<'demandes' | 'confirmees' | 'historique'>('demandes')
+  const [demandes, setDemandes]   = useState<Demande[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [actionLoading, setActionLoading] = useState(false)
+  const [error, setError]         = useState('')
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      try {
+        const res = await api.get<{ data: Demande[]; total: number }>('/bookings?role=gardien')
+        setDemandes(res.data || [])
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erreur lors du chargement')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
 
   const enAttente  = demandes.filter(d => d.statut === 'en_attente')
   const confirmees = demandes.filter(d => d.statut === 'confirmee')
-  const historique = demandes.filter(d => d.statut === 'terminee' || d.statut === 'refusee')
+  const historique = demandes.filter(d => ['terminee','refusee','annulee'].includes(d.statut))
 
-  const accepter = (id: number) =>
-    setDemandes(prev => prev.map(d => d.id === id ? { ...d, statut: 'confirmee' } : d))
+  const gardesDates = new Set<string>()
+  confirmees.forEach(d => {
+    const debut = new Date(d.date_debut)
+    const fin   = new Date(d.date_fin)
+    for (const dt = new Date(debut); dt <= fin; dt.setDate(dt.getDate() + 1)) {
+      gardesDates.add(dt.toISOString().split('T')[0])
+    }
+  })
 
-  const refuser = (id: number) =>
-    setDemandes(prev => prev.map(d => d.id === id ? { ...d, statut: 'refusee' } : d))
+  const accepter = async (id: string) => {
+    setActionLoading(true)
+    try {
+      await api.patch(`/bookings/${id}/confirm`, {})
+      setDemandes(prev => prev.map(d => d.id === id ? { ...d, statut: 'confirmee' } : d))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const refuser = async (id: string) => {
+    setActionLoading(true)
+    try {
+      await api.patch(`/bookings/${id}/cancel`, {})
+      setDemandes(prev => prev.map(d => d.id === id ? { ...d, statut: 'annulee' } : d))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur')
+    } finally {
+      setActionLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
 
-      {/* Navbar connectée */}
-      <Header isConnected />
+      <Header />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-8">
 
-        {/* Bannière vérification */}
-        <div className="flex items-center gap-3 px-5 py-3 rounded-xl mb-6 text-sm"
-          style={{ backgroundColor: '#E8F0DC', border: '1px solid #C8D5B0' }}>
-          <span style={{ color: '#3A5220' }}>ℹ️</span>
-          <span className="text-gray-700">Votre vérification d'identité est en attente de traitement.</span>
-          <Link to="/profil?tab=verification" className="font-bold hover:underline ml-1" style={{ color: '#D91B5C' }}>
-            Vérifier le statut →
-          </Link>
-        </div>
+        {user && !user.identite_verifiee && (
+          <div className="flex items-center gap-3 px-5 py-3 rounded-xl mb-6 text-sm"
+            style={{ backgroundColor: '#E8F0DC', border: '1px solid #C8D5B0' }}>
+            <span>ℹ️</span>
+            <span className="text-gray-700">Votre vérification d'identité est en attente.</span>
+            <Link to="/profil?tab=verification" className="font-bold hover:underline ml-1" style={{ color: '#D91B5C' }}>
+              Vérifier →
+            </Link>
+          </div>
+        )}
+
+        {error && <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>}
 
         <div className="flex gap-8 items-start">
 
-          {/* ── Colonne principale ────────────────────────────── */}
           <div className="flex-1 min-w-0">
 
-            {/* En-tête */}
             <div className="flex items-start justify-between mb-2">
               <div>
                 <h1 className="text-2xl font-black text-gray-900" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  Bonjour {MOCK_GARDIEN_NOM}
+                  Bonjour {user?.prenom || user?.nom || ''}
                 </h1>
-                <p className="text-sm text-gray-600 mt-1">
-                  Vous avez{' '}
-                  <span className="font-black" style={{ color: '#D91B5C' }}>{enAttente.length} demande{enAttente.length > 1 ? 's' : ''} en attente</span>
-                  {' '}et{' '}
-                  <span className="font-black text-gray-800">{confirmees.length} garde{confirmees.length > 1 ? 's' : ''} confirmée{confirmees.length > 1 ? 's' : ''}</span>
-                  {' '}ce mois
-                </p>
+                {!loading && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    <span className="font-black" style={{ color: '#D91B5C' }}>{enAttente.length} demande{enAttente.length !== 1 ? 's' : ''} en attente</span>
+                    {' · '}
+                    <span className="font-black text-gray-800">{confirmees.length} garde{confirmees.length !== 1 ? 's' : ''} confirmée{confirmees.length !== 1 ? 's' : ''}</span>
+                  </p>
+                )}
               </div>
               <Link to="/profil?tab=gardien"
                 className="px-4 py-2.5 rounded-xl text-sm font-bold text-white hover:opacity-90 transition shrink-0"
                 style={{ backgroundColor: '#3A5220' }}>
-                Modifier mes disponibilités
+                Mes disponibilités
               </Link>
             </div>
 
-            {/* Onglets */}
             <div className="flex gap-0 border-b border-gray-200 mb-5">
               {[
-                { key: 'demandes',   label: 'Demandes',  count: enAttente.length },
+                { key: 'demandes',   label: 'Demandes',   count: enAttente.length },
                 { key: 'confirmees', label: 'Confirmées', count: confirmees.length },
                 { key: 'historique', label: 'Historique', count: null },
               ].map(t => (
@@ -246,61 +251,50 @@ export default function DashboardGardienPage() {
               ))}
             </div>
 
-            {/* Contenu onglet Demandes */}
-            {tab === 'demandes' && (
+            {loading && <div className="text-center py-10 text-gray-400 text-sm">Chargement...</div>}
+
+            {!loading && tab === 'demandes' && (
               <div className="flex flex-col gap-3">
-                {enAttente.length === 0 ? (
-                  <div className="bg-white rounded-2xl p-10 text-center">
-                    <p className="text-3xl mb-2">📭</p>
-                    <p className="font-bold text-gray-700">Aucune demande en attente</p>
-                  </div>
-                ) : enAttente.map(d => (
-                  <CarteDemandeAttente key={d.id} d={d} onAccepter={accepter} onRefuser={refuser} />
-                ))}
+                {enAttente.length === 0
+                  ? <div className="bg-white rounded-2xl p-10 text-center"><p className="text-3xl mb-2">📭</p><p className="font-bold text-gray-700">Aucune demande en attente</p></div>
+                  : enAttente.map(d => <CarteDemandeAttente key={d.id} d={d} onAccepter={accepter} onRefuser={refuser} loading={actionLoading} />)}
               </div>
             )}
 
-            {/* Contenu onglet Confirmées */}
-            {tab === 'confirmees' && (
+            {!loading && tab === 'confirmees' && (
               <div className="flex flex-col gap-3">
-                {confirmees.length === 0 ? (
-                  <div className="bg-white rounded-2xl p-10 text-center">
-                    <p className="text-3xl mb-2">📅</p>
-                    <p className="font-bold text-gray-700">Aucune garde confirmée</p>
-                  </div>
-                ) : confirmees.map(d => <CarteConfirmee key={d.id} d={d} />)}
+                {confirmees.length === 0
+                  ? <div className="bg-white rounded-2xl p-10 text-center"><p className="text-3xl mb-2">📅</p><p className="font-bold text-gray-700">Aucune garde confirmée</p></div>
+                  : confirmees.map(d => <CarteConfirmee key={d.id} d={d} />)}
               </div>
             )}
 
-            {/* Contenu onglet Historique */}
-            {tab === 'historique' && (
+            {!loading && tab === 'historique' && (
               <div className="flex flex-col gap-3">
-                {historique.length === 0 ? (
-                  <div className="bg-white rounded-2xl p-10 text-center">
-                    <p className="text-3xl mb-2">📖</p>
-                    <p className="font-bold text-gray-700">Aucun historique</p>
-                  </div>
-                ) : historique.map(d => (
-                  <div key={d.id} className="bg-white rounded-2xl border border-gray-100 px-5 py-4 flex items-center gap-4 opacity-70">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
-                    <div className="flex-1">
-                      <p className="font-black text-gray-700 text-sm">{d.proprietaire.nom} — {d.animal.nom} ({d.animal.race})</p>
-                      <p className="text-xs text-gray-400">{formatDate(d.dateDebut)} · {d.typeGarde}</p>
+                {historique.length === 0
+                  ? <div className="bg-white rounded-2xl p-10 text-center"><p className="text-3xl mb-2">📖</p><p className="font-bold text-gray-700">Aucun historique</p></div>
+                  : historique.map(d => (
+                    <div key={d.id} className="bg-white rounded-2xl border border-gray-100 px-5 py-4 flex items-center gap-4 opacity-70">
+                      <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-black text-gray-700 text-sm">Garde #{d.id.slice(0, 8)}</p>
+                        <p className="text-xs text-gray-400">{formatDate(d.date_debut)} → {formatDate(d.date_fin)}</p>
+                      </div>
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                        d.statut === 'terminee' ? 'bg-gray-100 text-gray-500'
+                        : d.statut === 'annulee' ? 'bg-orange-50 text-orange-400'
+                        : 'bg-red-50 text-red-400'
+                      }`}>
+                        {d.statut === 'terminee' ? 'Terminée' : d.statut === 'annulee' ? 'Annulée' : 'Refusée'}
+                      </span>
                     </div>
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                      d.statut === 'terminee' ? 'bg-gray-100 text-gray-500' : 'bg-red-50 text-red-400'
-                    }`}>
-                      {d.statut === 'terminee' ? 'Terminée' : 'Refusée'}
-                    </span>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>
 
-          {/* ── Sidebar calendrier ────────────────────────────── */}
           <div className="w-64 shrink-0 sticky top-6">
-            <CalendarDashboard gardes={GARDES_DATES} dispos={DISPOS_DATES} />
+            <CalendarDashboard gardes={gardesDates} />
           </div>
         </div>
       </main>

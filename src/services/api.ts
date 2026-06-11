@@ -21,8 +21,15 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   if (!res.ok) {
-    const payload = await res.json().catch(() => ({})) as Record<string, string>;
-    throw new Error(payload.error ?? payload.message ?? `Erreur ${res.status}`);
+    const payload = await res.json().catch(() => ({})) as Record<string, unknown>;
+    // Le back renvoie { error: { message, name, statusCode } } pour les ApiError
+    const errObj = payload.error;
+    const errMsg =
+      typeof errObj === 'string' ? errObj
+      : typeof errObj === 'object' && errObj !== null && 'message' in errObj ? String((errObj as Record<string,unknown>).message)
+      : typeof payload.message === 'string' ? payload.message
+      : `Erreur ${res.status}`;
+    throw new Error(errMsg);
   }
 
   if (res.status === 204) return undefined as T;

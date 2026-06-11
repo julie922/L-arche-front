@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../services/api'
+import Header from '../components/Header'
 
 type Role = 'proprio' | 'gardien' | 'les-deux' | null
 
@@ -307,8 +308,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Nunito', sans-serif" }}>
-      <header className="w-full h-16 bg-[#0D0D0D]" />
-      <div className="w-full h-[3px] bg-[#4A90D9]" />
+      <Header />
 
       <main className="flex-1 flex flex-col items-center px-4 py-10" style={{ backgroundColor: '#F0EBE1' }}>
 
