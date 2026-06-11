@@ -54,8 +54,8 @@ export default function DashboardProprioPage() {
       setLoading(true)
       try {
         const [animRes, resaRes] = await Promise.all([
-          api.get<{ data: Animal[]; total: number }>('/animals/my'),
-          api.get<{ data: Reservation[]; total: number }>('/bookings?role=proprietaire'),
+          api.get<{ data: Animal[]; total: number }>('/animals'),
+          api.get<{ data: Reservation[]; total: number }>('/reservations?role=proprietaire'),
         ])
         setAnimaux(animRes.data || [])
         setReservations(resaRes.data || [])

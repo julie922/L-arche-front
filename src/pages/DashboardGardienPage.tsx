@@ -137,7 +137,7 @@ export default function DashboardGardienPage() {
     const load = async () => {
       setLoading(true)
       try {
-        const res = await api.get<{ data: Demande[]; total: number }>('/bookings?role=gardien')
+        const res = await api.get<{ data: Demande[]; total: number }>('/reservations?role=gardien')
         setDemandes(res.data || [])
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erreur lors du chargement')
@@ -164,7 +164,7 @@ export default function DashboardGardienPage() {
   const accepter = async (id: string) => {
     setActionLoading(true)
     try {
-      await api.patch(`/bookings/${id}/confirm`, {})
+      await api.patch(`/reservations/${id}/confirm`, {})
       setDemandes(prev => prev.map(d => d.id === id ? { ...d, statut: 'confirmee' } : d))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur')
@@ -176,7 +176,7 @@ export default function DashboardGardienPage() {
   const refuser = async (id: string) => {
     setActionLoading(true)
     try {
-      await api.patch(`/bookings/${id}/cancel`, {})
+      await api.patch(`/reservations/${id}/cancel`, {})
       setDemandes(prev => prev.map(d => d.id === id ? { ...d, statut: 'annulee' } : d))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur')

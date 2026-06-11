@@ -165,7 +165,7 @@ export default function ProfilPage() {
   const loadAnimaux = useCallback(async () => {
     setLoadingAnimaux(true)
     try {
-      const res = await api.get<{ data: Record<string, unknown>[]; total: number }>('/animals/my')
+      const res = await api.get<{ data: Record<string, unknown>[]; total: number }>('/animals')
       const items: Animal[] = (res.data || []).map((a) => ({
         id:                String(a.id),
         nom:               String(a.nom || ''),
