@@ -1,19 +1,26 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 
 const NAV = [
   { path: '/admin',               icon: '📊', label: 'Tableau de bord' },
   { path: '/admin/utilisateurs',  icon: '👥', label: 'Utilisateurs'    },
-  { path: '/admin/verifications', icon: '✅', label: 'Vérifications',  badge: 3  },
+  { path: '/admin/verifications', icon: '✅', label: 'Vérifications'   },
   { path: '/admin/gardes',        icon: '🐾', label: 'Gardes en cours' },
-  { path: '/admin/signalements',  icon: '⚠️', label: 'Signalements',   badge: 2  },
+  { path: '/admin/signalements',  icon: '⚠️', label: 'Signalements'   },
   { path: '/admin/avis',          icon: '⭐', label: 'Avis'            },
-  { path: '/admin/especes',        icon: '🦎', label: 'Espèces'          },
-  { path: '/admin/merch',          icon: '🛍️', label: 'Produits'         },
-  { path: '/admin/commandes',      icon: '📦', label: 'Commandes'        },
+  { path: '/admin/especes',        icon: '🦎', label: 'Espèces'         },
+  { path: '/admin/merch',          icon: '🛍️', label: 'Produits'        },
+  { path: '/admin/commandes',      icon: '📦', label: 'Commandes'       },
 ]
 
 export default function AdminLayout({ children, title }: { children: React.ReactNode; title: string }) {
   const { pathname } = useLocation()
+  const { user } = useAuth()
+
+  const initials = user
+    ? ((user.prenom?.[0] ?? '') + (user.nom?.[0] ?? '')).toUpperCase() || 'A'
+    : 'A'
+  const displayName = user ? (user.prenom || user.nom || 'Admin') : 'Admin'
 
   return (
     <div className="min-h-screen flex" style={{ fontFamily: "'Nunito', sans-serif" }}>
@@ -32,19 +39,12 @@ export default function AdminLayout({ children, title }: { children: React.React
             const active = pathname === item.path
             return (
               <Link key={item.path} to={item.path}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                   active ? 'text-[#2D4A18]' : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
                 style={active ? { backgroundColor: '#A8C539' } : {}}>
-                <span className="flex items-center gap-2.5">
-                  <span className="text-base">{item.icon}</span>
-                  {item.label}
-                </span>
-                {item.badge && (
-                  <span className="text-xs font-black px-1.5 py-0.5 rounded-full bg-[#D91B5C] text-white">
-                    {item.badge}
-                  </span>
-                )}
+                <span className="text-base">{item.icon}</span>
+                {item.label}
               </Link>
             )
           })}
@@ -65,9 +65,9 @@ export default function AdminLayout({ children, title }: { children: React.React
           <h1 className="text-base font-black text-gray-900">{title}</h1>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white" style={{ backgroundColor: '#D91B5C' }}>
-              A
+              {initials}
             </div>
-            <span className="text-sm font-semibold text-gray-700">Admin</span>
+            <span className="text-sm font-semibold text-gray-700">{displayName}</span>
           </div>
         </header>
 

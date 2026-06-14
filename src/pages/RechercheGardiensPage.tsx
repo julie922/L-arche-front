@@ -51,8 +51,8 @@ export default function RechercheGardiensPage() {
   const [distance,     setDistance]     = useState(20)
   const [dateDebut,    setDateDebut]     = useState('')
   const [dateFin,      setDateFin]       = useState('')
-  const [espece,       setEspece]        = useState('Chien')
-  const [noteMin,      setNoteMin]       = useState(4)
+  const [espece,       setEspece]        = useState('')
+  const [noteMin,      setNoteMin]       = useState(0)
   const [verifieOnly,  setVerifieOnly]   = useState(false)
   const [vue,          setVue]           = useState<'liste' | 'carte' | 'pertinence'>('liste')
 
@@ -67,12 +67,9 @@ export default function RechercheGardiensPage() {
     setLoading(true)
     setError('')
     try {
-      const params = new URLSearchParams({
-        espece,
-        note_min:    String(noteMin),
-        limit:       '30',
-        offset:      '0',
-      })
+      const params = new URLSearchParams({ limit: '30', offset: '0' })
+      if (espece) params.set('espece', espece.toLowerCase())
+      if (noteMin > 0) params.set('note_min', String(noteMin))
       if (verifieOnly) params.set('verifie', 'true')
       const res = await api.get<{ data: Gardien[]; total: number }>(`/users/gardiens?${params}`)
       setGardiens(res.data || [])
@@ -87,7 +84,7 @@ export default function RechercheGardiensPage() {
   useEffect(() => { search() }, [search])
 
   const reset = () => {
-    setNoteMin(3); setVerifieOnly(false); setDistance(20); setEspece('Chien')
+    setNoteMin(0); setVerifieOnly(false); setDistance(20); setEspece('')
   }
 
   return (
@@ -132,7 +129,8 @@ export default function RechercheGardiensPage() {
           <div>
             <p className="text-xs font-black tracking-widest text-gray-400 mb-2">ESPÈCE</p>
             <select value={espece} onChange={e => setEspece(e.target.value)} className={inputCls + ' bg-white'}>
-              {ESPECES.map(e => <option key={e}>{e}</option>)}
+              <option value="">Toutes les espèces</option>
+              {ESPECES.map(e => <option key={e} value={e}>{e}</option>)}
             </select>
           </div>
 

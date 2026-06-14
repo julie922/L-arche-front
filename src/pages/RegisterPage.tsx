@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../services/api'
 import Header from '../components/Header'
@@ -63,7 +63,7 @@ function StepIndicator({ steps, current }: { steps: StepKey[]; current: number }
               </span>
             </div>
             {i < steps.length - 1 && (
-              <div className={`w-12 h-[2px] mt-[18px] ${done ? 'bg-[#5A7A1A]' : 'bg-gray-200'}`} />
+              <div className={`w-12 h-0.5 mt-4.5 ${done ? 'bg-[#5A7A1A]' : 'bg-gray-200'}`} />
             )}
           </div>
         )
@@ -203,8 +203,12 @@ function CalendarPicker({ selected, onChange, recurring, onRecurringChange }: Ca
 
 // ─── Composant principal ─────────────────────────────────────────────────────
 export default function RegisterPage() {
-  const { login } = useAuth()
+  const { login, isAuthenticated, isLoading, isAdmin, user } = useAuth()
   const navigate = useNavigate()
+
+  if (!isLoading && isAuthenticated) {
+    return <Navigate to={isAdmin ? '/admin' : user?.est_gardien ? '/dashboard' : '/dashboard-proprio'} replace />
+  }
   const [step, setStep]   = useState(1)
   const [role, setRole]   = useState<Role>(null)
   const [error, setError]           = useState('')
@@ -316,7 +320,7 @@ export default function RegisterPage() {
         {step === 1 && (
           <>
             <img src="/logo1.png" alt="L'Arche" className="h-16 w-auto mb-8" />
-            <div className="bg-white rounded-2xl shadow-sm w-full max-w-[520px] overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm w-full max-w-130 overflow-hidden">
               <div className="px-10 py-8">
                 <div className="text-center mb-8">
                   <h1 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Créer mon compte</h1>
@@ -372,7 +376,7 @@ export default function RegisterPage() {
 
         {/* ── Étape Mon animal (proprio / les-deux) ────────────── */}
         {step > 1 && stepKey === 'animal' && (
-          <div className="bg-white rounded-2xl shadow-sm w-full max-w-[520px] px-8 py-8">
+          <div className="bg-white rounded-2xl shadow-sm w-full max-w-130 px-8 py-8">
             <p className="text-xs font-black tracking-widest mb-1" style={{ color: '#5A7A1A' }}>ÉTAPE {step} SUR {totalSteps}</p>
             <h1 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Mon animal</h1>
             <p className="text-sm text-gray-500 mb-6">Présentez votre compagnon pour trouver le gardien parfait</p>
@@ -446,7 +450,7 @@ export default function RegisterPage() {
 
         {/* ── Étape Expérience ──────────────────────────────────── */}
         {step > 1 && stepKey === 'experience' && (
-          <div className="bg-white rounded-2xl shadow-sm w-full max-w-[520px] px-8 py-8">
+          <div className="bg-white rounded-2xl shadow-sm w-full max-w-130 px-8 py-8">
             <p className="text-xs font-black tracking-widest mb-1" style={{ color: '#5A7A1A' }}>ÉTAPE {step} SUR {totalSteps}</p>
             <h1 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Mon expérience</h1>
             <p className="text-sm text-gray-500 mb-6">Parlez-nous de votre expérience avec les animaux</p>
@@ -527,7 +531,7 @@ export default function RegisterPage() {
 
         {/* ── Étape Disponibilités ──────────────────────────────── */}
         {step > 1 && stepKey === 'dispos' && (
-          <div className="bg-white rounded-2xl shadow-sm w-full max-w-[520px] px-8 py-8">
+          <div className="bg-white rounded-2xl shadow-sm w-full max-w-130 px-8 py-8">
             <p className="text-xs font-black tracking-widest mb-1" style={{ color: '#5A7A1A' }}>ÉTAPE {step} SUR {totalSteps}</p>
             <h1 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Mes disponibilités</h1>
             <p className="text-sm text-gray-500 mb-6">Indiquez quand vous pouvez accueillir des animaux</p>
@@ -569,7 +573,7 @@ export default function RegisterPage() {
 
         {/* ── Étape Vérification ────────────────────────────────── */}
         {step > 1 && stepKey === 'verif' && (
-          <div className="bg-white rounded-2xl shadow-sm w-full max-w-[520px] px-8 py-8">
+          <div className="bg-white rounded-2xl shadow-sm w-full max-w-130 px-8 py-8">
             <p className="text-xs font-black tracking-widest mb-1" style={{ color: '#5A7A1A' }}>ÉTAPE {step} SUR {totalSteps}</p>
             <h1 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Vérification</h1>
             <p className="text-sm text-gray-500 mb-6">Vérifiez vos informations avant de valider</p>

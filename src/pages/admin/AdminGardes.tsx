@@ -1,104 +1,136 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
+import { api } from '../../services/api'
 
-const MOCK_GARDES = [
-  { id: 1, animal: 'Luna (Border Collie)', proprio: 'Camille R.', gardien: 'Jules M.',  debut: '10/03',  fin: '17/03', type: 'Domicile', jour: 3, litige: false },
-  { id: 2, animal: 'Mimi (Ragdoll)',       proprio: 'Marc L.',    gardien: 'Léa R.',    debut: '12/03',  fin: '15/03', type: 'Domicile', jour: 1, litige: false },
-  { id: 3, animal: 'Rex (Labrador)',       proprio: 'Sophie T.',  gardien: 'Pierre D.', debut: '11/03',  fin: '16/03', type: 'Visite',   jour: 2, litige: true  },
-  { id: 4, animal: 'Noisette (Chat)',      proprio: 'Julie B.',   gardien: 'Marie T.',  debut: '09/03',  fin: '13/03', type: 'Domicile', jour: 4, litige: false },
-]
+interface Reservation {
+  id: string
+  proprietaire_id: string
+  gardien_id: string
+  animal_id: string
+  date_debut: string
+  date_fin: string
+  statut: 'en_attente' | 'confirmee' | 'terminee' | 'annulee'
+  assurance: boolean
+  instructions: string | null
+  created_at: string
+}
+
+const STATUT_LABEL: Record<string, { label: string; color: string; bg: string }> = {
+  en_attente: { label: 'En attente', color: '#F59E0B', bg: '#FEF3C7' },
+  confirmee:  { label: 'En cours',   color: '#3A5220', bg: '#E8F0DC' },
+  terminee:   { label: 'Terminée',   color: '#6B7280', bg: '#F3F4F6' },
+  annulee:    { label: 'Annulée',    color: '#EF4444', bg: '#FEE2E2' },
+}
 
 export default function AdminGardes() {
-  const [gardes, setGardes] = useState(MOCK_GARDES)
-  const [litigeActif, setLitigeActif] = useState<number | null>(null)
-  const [noteAdmin, setNoteAdmin]     = useState('')
+  const [reservations, setReservations] = useState<Reservation[]>([])
+  const [loading, setLoading]           = useState(true)
+  const [error, setError]               = useState('')
+  const [filtre, setFiltre]             = useState<string>('all')
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const params = filtre !== 'all' ? `?statut=${filtre}` : ''
+      const res = await api.get<{ data: Reservation[]; total: number }>(`/reservations/all${params}`)
+      setReservations(res.data || [])
+    } catch {
+      setError('Impossible de charger les réservations.')
+    } finally {
+      setLoading(false)
+    }
+  }, [filtre])
+
+  useEffect(() => { load() }, [load])
+
+  const confirmees = reservations.filter(r => r.statut === 'confirmee')
+  const enAttente  = reservations.filter(r => r.statut === 'en_attente')
 
   return (
     <AdminLayout title="Gardes en cours">
 
-      <div className="flex items-center gap-4 mb-5">
+      {/* Filtres */}
+      <div className="flex flex-wrap items-center gap-3 mb-5">
         <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-white border border-gray-200">
           <span className="w-2.5 h-2.5 rounded-full bg-[#3A5220] animate-pulse" />
-          {gardes.length} gardes actives
+          {confirmees.length} garde{confirmees.length !== 1 ? 's' : ''} active{confirmees.length !== 1 ? 's' : ''}
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-white border border-red-200 text-red-500">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-          {gardes.filter(g => g.litige).length} litige{gardes.filter(g => g.litige).length > 1 ? 's' : ''}
+        <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-white border border-amber-200 text-amber-600">
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+          {enAttente.length} en attente
+        </div>
+
+        <div className="ml-auto flex gap-2">
+          {[
+            { v: 'all', label: 'Toutes' },
+            { v: 'confirmee', label: 'En cours' },
+            { v: 'en_attente', label: 'En attente' },
+            { v: 'terminee', label: 'Terminées' },
+          ].map(f => (
+            <button key={f.v} type="button" onClick={() => setFiltre(f.v)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
+                filtre === f.v ? 'text-white border-transparent' : 'bg-white border-gray-200 text-gray-600'
+              }`}
+              style={filtre === f.v ? { backgroundColor: '#3A5220' } : {}}>
+              {f.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-100">
-              {['Animal / Race', 'Propriétaire', 'Gardien', 'Dates', 'Type', 'Jour', 'Statut', ''].map(h => (
-                <th key={h} className="text-left px-4 py-3 text-xs font-black tracking-widest text-gray-400 uppercase">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {gardes.map(g => (
-              <tr key={g.id} className={`hover:bg-gray-50 transition-colors ${g.litige ? 'bg-red-50/50' : ''}`}>
-                <td className="px-4 py-3 font-semibold text-gray-800">{g.animal}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs">{g.proprio}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs">{g.gardien}</td>
-                <td className="px-4 py-3 text-gray-500 text-xs">{g.debut} → {g.fin}</td>
-                <td className="px-4 py-3 text-xs">
-                  <span className="px-2 py-0.5 rounded-full bg-[#E8F0DC] text-[#3A5220] font-semibold">{g.type}</span>
-                </td>
-                <td className="px-4 py-3 text-xs text-gray-500">Jour {g.jour}</td>
-                <td className="px-4 py-3">
-                  {g.litige
-                    ? <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-600">⚠️ Litige</span>
-                    : <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#E8F0DC] text-[#3A5220]">En cours</span>}
-                </td>
-                <td className="px-4 py-3">
-                  {g.litige && (
-                    <button type="button" onClick={() => setLitigeActif(g.id)}
-                      className="text-xs font-bold px-3 py-1.5 rounded-lg border-2 border-red-200 text-red-600 hover:bg-red-50 transition">
-                      Intervenir
-                    </button>
-                  )}
-                </td>
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600">{error}</div>
+      )}
+
+      {loading ? (
+        <div className="bg-white rounded-2xl p-10 text-center border border-gray-100 text-gray-400 text-sm">Chargement…</div>
+      ) : reservations.length === 0 ? (
+        <div className="bg-white rounded-2xl p-10 text-center border border-gray-100">
+          <p className="text-2xl mb-2">🐾</p>
+          <p className="font-bold text-gray-700">Aucune réservation</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                {['Propriétaire', 'Gardien', 'Dates', 'Assurance', 'Statut', 'Créée le'].map(h => (
+                  <th key={h} className="text-left px-4 py-3 text-xs font-black tracking-widest text-gray-400 uppercase">{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Modal litige */}
-      {litigeActif && (() => {
-        const g = gardes.find(x => x.id === litigeActif)!
-        return (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-xl">
-              <p className="text-lg font-black text-gray-900 mb-1">Litige — {g.animal}</p>
-              <p className="text-sm text-gray-500 mb-5">Entre {g.proprio} et {g.gardien}</p>
-              <div className="flex flex-col gap-3 mb-5">
-                <button type="button" className="py-2.5 rounded-xl text-sm font-bold border-2 border-gray-200 text-gray-700 hover:bg-gray-50">
-                  📨 Contacter le propriétaire
-                </button>
-                <button type="button" className="py-2.5 rounded-xl text-sm font-bold border-2 border-gray-200 text-gray-700 hover:bg-gray-50">
-                  📨 Contacter le gardien
-                </button>
-                <button type="button"
-                  onClick={() => { setGardes(prev => prev.map(x => x.id === litigeActif ? { ...x, litige: false } : x)); setLitigeActif(null) }}
-                  className="py-2.5 rounded-xl text-sm font-bold text-white hover:opacity-90 transition"
-                  style={{ backgroundColor: '#3A5220' }}>
-                  ✓ Marquer comme résolu
-                </button>
-              </div>
-              <label className="text-xs font-bold text-gray-700 block mb-1">Note interne</label>
-              <textarea rows={2} value={noteAdmin} onChange={e => setNoteAdmin(e.target.value)}
-                placeholder="Résumé de l'intervention..." className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#3A5220] mb-4" />
-              <button type="button" onClick={() => setLitigeActif(null)}
-                className="w-full py-2.5 rounded-xl border-2 border-gray-200 text-sm font-bold text-gray-600">
-                Fermer
-              </button>
-            </div>
-          </div>
-        )
-      })()}
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {reservations.map(r => {
+                const s = STATUT_LABEL[r.statut] ?? { label: r.statut, color: '#6B7280', bg: '#F3F4F6' }
+                return (
+                  <tr key={r.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{r.proprietaire_id.slice(0, 8)}…</td>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{r.gardien_id.slice(0, 8)}…</td>
+                    <td className="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">
+                      {new Date(r.date_debut).toLocaleDateString('fr-FR')} → {new Date(r.date_fin).toLocaleDateString('fr-FR')}
+                    </td>
+                    <td className="px-4 py-3 text-xs">
+                      {r.assurance
+                        ? <span className="text-green-600 font-bold">✓ Oui</span>
+                        : <span className="text-gray-400">Non</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full"
+                        style={{ backgroundColor: s.bg, color: s.color }}>
+                        {s.label}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {new Date(r.created_at).toLocaleDateString('fr-FR')}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </AdminLayout>
   )
 }

@@ -191,12 +191,11 @@ export default function ProfilPage() {
 
   // ── Calcul complétion ────────────────────────────────────────────────────────
   const fields = [
-    { filled: !!form.firstName,   weight: 15, label: 'prénom' },
-    { filled: !!form.lastName,    weight: 15, label: 'nom' },
-    { filled: !!form.email,       weight: 15, label: 'email' },
-    { filled: !!form.phone,       weight: 15, label: 'téléphone' },
-    { filled: !!form.ville,       weight: 10, label: 'ville' },
-    { filled: !!form.bio,         weight: 15, label: 'présentation' },
+    { filled: !!form.firstName,   weight: 20, label: 'prénom' },
+    { filled: !!form.lastName,    weight: 20, label: 'nom' },
+    { filled: !!form.phone,       weight: 20, label: 'téléphone' },
+    { filled: !!form.ville,       weight: 15, label: 'ville' },
+    { filled: !!form.bio,         weight: 20, label: 'présentation' },
     { filled: animaux.length > 0, weight: 5,  label: 'animal' },
   ]
   const completion = fields.filter(f => f.filled).reduce((acc, f) => acc + f.weight, 0)
@@ -319,7 +318,7 @@ export default function ProfilPage() {
         </div>
 
         {/* Onglets */}
-        <div className="flex gap-0 border-b border-gray-200 mb-6 overflow-x-auto">
+        <div className="flex gap-0 border-b border-gray-200 mb-6">
           {TABS.map(t => (
             <button key={t.key} type="button" onClick={() => setTab(t.key)}
               className={`px-4 py-3 text-sm font-bold whitespace-nowrap transition-colors border-b-2 -mb-px ${tab === t.key ? 'border-[#3A5220] text-[#3A5220]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
@@ -335,11 +334,6 @@ export default function ProfilPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1"><label className="text-sm font-bold text-gray-800">Prénom</label><input type="text" className={inputCls} placeholder="Camille" value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} /></div>
                 <div className="flex flex-col gap-1"><label className="text-sm font-bold text-gray-800">Nom</label><input type="text" className={inputCls} placeholder="Dupont" value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })} /></div>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-bold text-gray-800">Email</label>
-                <input type="email" className={inputCls + ' bg-gray-50 cursor-not-allowed'} disabled value={form.email} />
-                <p className="text-xs text-gray-400">L'email ne peut pas être modifié ici.</p>
               </div>
               <div className="flex flex-col gap-1"><label className="text-sm font-bold text-gray-800">Téléphone</label><input type="tel" className={inputCls} placeholder="06 12 34 56 78" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
               <div className="flex flex-col gap-1"><label className="text-sm font-bold text-gray-800">Ville</label><input type="text" className={inputCls} placeholder="Lyon, 69003" value={form.ville} onChange={e => setForm({ ...form, ville: e.target.value })} /></div>

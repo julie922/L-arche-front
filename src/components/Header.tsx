@@ -23,7 +23,7 @@ export default function Header() {
     : ''
 
   return (
-    <nav
+    <header
       className="w-full bg-white border-b border-gray-100 px-8 h-14 flex items-center justify-between shrink-0 sticky top-0 z-40"
       style={{ fontFamily: "'Nunito', sans-serif" }}
     >
@@ -83,6 +83,6 @@ export default function Header() {
           </>
         )}
       </div>
-    </nav>
+    </header>
   )
 }

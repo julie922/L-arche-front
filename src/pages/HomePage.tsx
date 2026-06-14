@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import { useAuth } from '../contexts/AuthContext'
 
 const ETAPES = [
   { num: '01', titre: 'Créez votre profil',         desc: 'Inscrivez-vous en 2 minutes, ajoutez vos animaux ou vos disponibilités selon votre rôle.',  icon: '👤' },
@@ -38,6 +39,9 @@ function Wave({ color = '#F0EBE1' }: { color?: string }) {
 }
 
 export default function HomePage() {
+  const { isAuthenticated, user } = useAuth()
+  const dashboardPath = user?.est_gardien ? '/dashboard' : '/dashboard-proprio'
+
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Nunito', sans-serif" }}>
 
@@ -69,7 +73,7 @@ export default function HomePage() {
               style={{ backgroundColor: '#A8C539' }}>
               Trouver un gardien →
             </Link>
-            <Link to="/register"
+            <Link to={isAuthenticated ? dashboardPath : '/register'}
               className="px-8 py-4 rounded-xl font-black text-white text-base border-2 border-white/40 hover:bg-white/10 transition">
               Devenir gardien
             </Link>
@@ -123,7 +127,7 @@ export default function HomePage() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <Link to="/register"
+            <Link to={isAuthenticated ? dashboardPath : '/register'}
               className="inline-block px-8 py-3.5 rounded-xl font-bold text-white hover:opacity-90 transition"
               style={{ backgroundColor: '#3A5220' }}>
               Commencer gratuitement →
@@ -178,7 +182,7 @@ export default function HomePage() {
               Notre plateforme crée des liens de confiance entre propriétaires et gardiens passionnés. Un animal gardé chez un particulier de confiance, c'est un animal épanoui — et une famille qui part sereine.
             </p>
             <div className="flex gap-4">
-              <Link to="/register"
+              <Link to={isAuthenticated ? dashboardPath : '/register'}
                 className="px-6 py-3 rounded-xl font-bold text-white text-sm hover:opacity-90 transition"
                 style={{ backgroundColor: '#3A5220' }}>
                 Rejoindre l'association
@@ -245,12 +249,12 @@ export default function HomePage() {
             Inscription gratuite en 2 minutes. Propriétaire ou gardien, trouvez votre place dans notre communauté.
           </p>
           <div className="flex gap-4 justify-center">
-            <Link to="/register?role=proprio"
+            <Link to={isAuthenticated ? '/dashboard-proprio' : '/register?role=proprio'}
               className="px-8 py-4 rounded-xl font-black text-white text-sm hover:opacity-90 transition"
               style={{ backgroundColor: '#3A5220' }}>
               Je cherche un gardien →
             </Link>
-            <Link to="/register?role=gardien"
+            <Link to={isAuthenticated ? (user?.est_gardien ? '/dashboard' : '/dashboard-proprio') : '/register?role=gardien'}
               className="px-8 py-4 rounded-xl font-black text-sm border-2 hover:bg-white transition"
               style={{ borderColor: '#3A5220', color: '#3A5220' }}>
               Je propose mes services

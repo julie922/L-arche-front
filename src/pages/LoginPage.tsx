@@ -37,12 +37,12 @@ export default function LoginPage() {
         style={{ backgroundColor: '#F0EBE1' }}
       >
         {/* Tiret bleu décoratif */}
-        <div className="w-8 h-[3px] bg-[#4A90D9] rounded-full mb-8" />
+        <div className="w-8 h-0.75 bg-[#4A90D9] rounded-full mb-8" />
 
         <img src="/logo1.png" alt="L'Arche" className="h-16 w-auto mb-8" />
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm w-full max-w-[480px] px-10 py-8 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm w-full max-w-120 px-10 py-8 mb-6">
 
           {/* Icône patte */}
           <div className="flex justify-center mb-5">
@@ -139,7 +139,7 @@ export default function LoginPage() {
         </p>
 
         {/* Tiret bleu décoratif */}
-        <div className="w-8 h-[3px] bg-[#4A90D9] rounded-full mt-8" />
+        <div className="w-8 h-0.75 bg-[#4A90D9] rounded-full mt-8" />
       </main>
     </div>
   )

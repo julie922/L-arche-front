@@ -38,7 +38,7 @@ export default function FichesEspecesPage() {
       <Header />
 
       {/* ── Hero ──────────────────────────────────────────── */}
-      <header className="relative flex flex-col items-center justify-center pt-16 pb-0 px-8 text-center"
+      <div className="relative flex flex-col items-center justify-center pt-16 pb-0 px-8 text-center"
         style={{ backgroundColor: '#3A5220', minHeight: '280px' }}>
 
         {/* Silhouettes décoratives */}
@@ -71,7 +71,7 @@ export default function FichesEspecesPage() {
         </div>
 
         <Wave />
-      </header>
+      </div>
 
       {/* ── Contenu ───────────────────────────────────────── */}
       <main className="flex-1 px-4 py-10" style={{ backgroundColor: '#F0EBE1' }}>

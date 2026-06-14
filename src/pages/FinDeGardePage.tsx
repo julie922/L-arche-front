@@ -187,7 +187,7 @@ export default function FinDeGardePage() {
                   </span>
                 </div>
                 {i < ETAPES.length - 1 && (
-                  <div className="w-16 h-[2px] mt-[18px]" style={{ backgroundColor: i < 1 ? '#D91B5C' : '#E5E7EB' }} />
+                  <div className="w-16 h-0.5 mt-4.5" style={{ backgroundColor: i < 1 ? '#D91B5C' : '#E5E7EB' }} />
                 )}
               </div>
             )

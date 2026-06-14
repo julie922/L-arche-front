@@ -42,6 +42,9 @@ export default function AdminCommandes() {
 
   return (
     <AdminLayout title="Gestion des commandes">
+      <div className="mb-5 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-sm font-semibold flex items-center gap-2">
+        🚧 Données de démonstration — aucune API commandes n'est connectée pour le moment.
+      </div>
 
       {/* Stats rapides */}
       <div className="grid grid-cols-4 gap-4 mb-6">
