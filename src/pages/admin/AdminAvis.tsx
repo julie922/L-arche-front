@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { api } from '../../services/api'
 
@@ -20,20 +20,12 @@ export default function AdminAvis() {
   const [filtre, setFiltre] = useState<'tous' | 'negatifs'>('negatifs')
   const [deleting, setDeleting] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const res = await api.get<{ data: Avis[]; total: number }>('/reviews')
-      setAvis(res.data || [])
-    } catch {
-      setError('Impossible de charger les avis.')
-    } finally {
-      setLoading(false)
-    }
+  useEffect(() => {
+    api.get<{ data: Avis[]; total: number }>('/reviews')
+      .then(res => setAvis(res.data || []))
+      .catch(() => setError('Impossible de charger les avis.'))
+      .finally(() => setLoading(false))
   }, [])
-
-  useEffect(() => { load() }, [load])
 
   const supprimer = async (id: string) => {
     setDeleting(id)

@@ -115,7 +115,8 @@ function CalendarPicker({ selected, onChange, recurring, onRecurringChange }: Ca
 
   const toggleDate = (key: string) => {
     const next = new Set(selected)
-    next.has(key) ? next.delete(key) : next.add(key)
+    if (next.has(key)) next.delete(key)
+    else next.add(key)
     onChange(next)
   }
 
@@ -201,14 +202,18 @@ function CalendarPicker({ selected, onChange, recurring, onRecurringChange }: Ca
   )
 }
 
+// ─── Champ formulaire label + input ─────────────────────────────────────────
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1">{children && <label className="text-sm font-bold text-gray-800">{label}</label>}{children}</div>
+  )
+}
+
 // ─── Composant principal ─────────────────────────────────────────────────────
 export default function RegisterPage() {
   const { login, isAuthenticated, isLoading, isAdmin, user } = useAuth()
   const navigate = useNavigate()
 
-  if (!isLoading && isAuthenticated) {
-    return <Navigate to={isAdmin ? '/admin' : user?.est_gardien ? '/dashboard' : '/dashboard-proprio'} replace />
-  }
   const [step, setStep]   = useState(1)
   const [role, setRole]   = useState<Role>(null)
   const [error, setError]           = useState('')
@@ -225,6 +230,10 @@ export default function RegisterPage() {
     bio: '',
     animauxGardes: [] as string[],
   })
+
+  if (!isLoading && isAuthenticated) {
+    return <Navigate to={isAdmin ? '/admin' : user?.est_gardien ? '/dashboard' : '/dashboard-proprio'} replace />
+  }
 
   const steps = getSteps(role)
   const totalSteps = steps.length
@@ -304,10 +313,6 @@ export default function RegisterPage() {
     }
   }
 
-  // Formulaire commun label + input
-  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div className="flex flex-col gap-1">{children && <label className="text-sm font-bold text-gray-800">{label}</label>}{children}</div>
-  )
   const inputCls = "border border-gray-200 rounded-xl px-4 py-3 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3A5220] focus:border-transparent"
 
   return (

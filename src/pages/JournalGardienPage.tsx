@@ -139,7 +139,6 @@ export default function JournalGardienPage() {
   }
 
   const jourActuel  = diffDays(reservation.date_debut, new Date().toISOString().split('T')[0]) + 1
-  const jourTotal   = diffDays(reservation.date_debut, reservation.date_fin) + 1
   const joursRestants = diffDays(new Date().toISOString().split('T')[0], reservation.date_fin)
   const animalEmoji = animal ? (ESPECE_EMOJI[animal.espece] ?? '🐾') : '🐾'
   const animalNom   = animal?.nom ?? '…'

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
 
 export interface AuthUser {
@@ -37,27 +37,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadUser = useCallback(async () => {
+  useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) {
-      setIsLoading(false);
+      Promise.resolve().then(() => setIsLoading(false));
       return;
     }
-    try {
-      const me = await api.get<AuthUser>('/users/me');
-      setUser(me);
-    } catch {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
+    api.get<AuthUser>('/users/me')
+      .then(me => setUser(me))
+      .catch(() => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        setUser(null);
+      })
+      .finally(() => setIsLoading(false));
   }, []);
-
-  useEffect(() => {
-    loadUser();
-  }, [loadUser]);
 
   const login = async (email: string, password: string): Promise<AuthUser> => {
     const data = await api.post<SigninResponse>('/auth/signin', { email, password });
@@ -100,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth doit être utilisé dans <AuthProvider>');

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import { api } from '../services/api'
-import { useAuth } from '../contexts/AuthContext'
 
 interface Reservation {
   id: string
@@ -55,7 +54,6 @@ function StarRating({ value, onChange, size = 'lg' }: { value: number; onChange:
 
 export default function FinDeGardePage() {
   const { gardeId } = useParams<{ gardeId: string }>()
-  const { user } = useAuth()
   const navigate = useNavigate()
 
   const [reservation, setReservation] = useState<Reservation | null>(null)

@@ -36,10 +36,18 @@ export default function SpeedquizGame() {
 
   useEffect(() => {
     if (!started || fini || reponse !== null) return
-    if (temps <= 0) { suivant(); return }
+    if (temps <= 0) {
+      const t = setTimeout(() => {
+        if (index + 1 >= QUESTIONS.length) { setFini(true); return }
+        setIndex(i => i + 1)
+        setReponse(null)
+        setTemps(TEMPS_PAR_QUESTION)
+      }, 0)
+      return () => clearTimeout(t)
+    }
     const t = setTimeout(() => setTemps(s => s - 1), 1000)
     return () => clearTimeout(t)
-  }, [started, fini, reponse, temps, suivant])
+  }, [started, fini, reponse, temps, index])
 
   const repondre = (i: number) => {
     if (reponse !== null) return

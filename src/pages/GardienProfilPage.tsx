@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import { api } from '../services/api'
 
@@ -128,7 +128,6 @@ function Tag({ label }: { label: string }) {
 
 export default function GardienProfilPage() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
 
   const [gardien, setGardien]   = useState<Gardien | null>(null)
   const [reviews, setReviews]   = useState<Review[]>([])

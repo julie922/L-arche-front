@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 import { api } from '../services/api'
@@ -57,13 +57,13 @@ export default function RechercheGardiensPage() {
   const [vue,          setVue]           = useState<'liste' | 'carte' | 'pertinence'>('liste')
 
   const [gardiens, setGardiens] = useState<Gardien[]>([])
-  const [loading,  setLoading]  = useState(false)
+  const [loading,  setLoading]  = useState(true)
   const [total,    setTotal]    = useState(0)
   const [error,    setError]    = useState('')
 
   const inputCls = "border border-gray-200 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#3A5220] focus:border-transparent"
 
-  const search = useCallback(async () => {
+  const search = async () => {
     setLoading(true)
     setError('')
     try {
@@ -79,9 +79,17 @@ export default function RechercheGardiensPage() {
     } finally {
       setLoading(false)
     }
-  }, [espece, noteMin, verifieOnly])
+  }
 
-  useEffect(() => { search() }, [search])
+  useEffect(() => {
+    const params = new URLSearchParams({ limit: '30', offset: '0' })
+    if (espece) params.set('espece', espece.toLowerCase())
+    if (noteMin > 0) params.set('note_min', String(noteMin))
+    if (verifieOnly) params.set('verifie', 'true')
+    api.get<{ data: Gardien[]; total: number }>(`/users/gardiens?${params}`)
+      .then(res => { setGardiens(res.data || []); setTotal(res.total || 0); setLoading(false) })
+      .catch(err => { setError(err instanceof Error ? err.message : 'Erreur lors de la recherche'); setLoading(false) })
+  }, [espece, noteMin, verifieOnly])
 
   const reset = () => {
     setNoteMin(0); setVerifieOnly(false); setDistance(20); setEspece('')

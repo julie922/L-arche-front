@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { api } from '../../services/api'
 
@@ -28,21 +28,12 @@ export default function AdminGardes() {
   const [error, setError]               = useState('')
   const [filtre, setFiltre]             = useState<string>('all')
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const params = filtre !== 'all' ? `?statut=${filtre}` : ''
-      const res = await api.get<{ data: Reservation[]; total: number }>(`/reservations/all${params}`)
-      setReservations(res.data || [])
-    } catch {
-      setError('Impossible de charger les réservations.')
-    } finally {
-      setLoading(false)
-    }
+  useEffect(() => {
+    const params = filtre !== 'all' ? `?statut=${filtre}` : ''
+    api.get<{ data: Reservation[]; total: number }>(`/reservations/all${params}`)
+      .then(res => { setReservations(res.data || []); setLoading(false) })
+      .catch(() => { setError('Impossible de charger les réservations.'); setLoading(false) })
   }, [filtre])
-
-  useEffect(() => { load() }, [load])
 
   const confirmees = reservations.filter(r => r.statut === 'confirmee')
   const enAttente  = reservations.filter(r => r.statut === 'en_attente')

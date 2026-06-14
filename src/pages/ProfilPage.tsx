@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import Header from '../components/Header'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../services/api'
@@ -151,43 +151,46 @@ export default function ProfilPage() {
   // ── Pré-remplir les champs depuis le contexte auth ───────────────────────────
   useEffect(() => {
     if (!user) return
-    setForm(f => ({
-      ...f,
-      firstName: user.prenom || '',
-      lastName:  user.nom    || '',
-      email:     user.email  || '',
-      ville:     user.ville  || '',
-    }))
-    setGardienActif(user.est_gardien)
+    const { prenom, nom, email, ville, est_gardien } = user
+    Promise.resolve().then(() => {
+      setForm(f => ({
+        ...f,
+        firstName: prenom || '',
+        lastName:  nom    || '',
+        email:     email  || '',
+        ville:     ville  || '',
+      }))
+      setGardienActif(est_gardien)
+    })
   }, [user])
 
   // ── Charger les animaux ──────────────────────────────────────────────────────
-  const loadAnimaux = useCallback(async () => {
-    setLoadingAnimaux(true)
-    try {
-      const res = await api.get<{ data: Record<string, unknown>[]; total: number }>('/animals')
-      const items: Animal[] = (res.data || []).map((a) => ({
-        id:                String(a.id),
-        nom:               String(a.nom || ''),
-        espece:            String(a.espece || ''),
-        race:              String(a.race || ''),
-        age:               String(a.age || ''),
-        poids:             a.poids ? String(a.poids) : '',
-        sexe:              String(a.sexe || ''),
-        caracteres:        Array.isArray(a.caractere) ? (a.caractere as string[]) : [],
-        besoins:           String(a.besoins_specifiques || ''),
-        infos_veterinaire: String(a.infos_veterinaire || ''),
-        photo_url:         a.photo_url ? String(a.photo_url) : null,
-      }))
-      setAnimaux(items)
-    } catch {
-      // silently ignore — liste vide
-    } finally {
-      setLoadingAnimaux(false)
-    }
+  useEffect(() => {
+    ;(async () => {
+      setLoadingAnimaux(true)
+      try {
+        const res = await api.get<{ data: Record<string, unknown>[]; total: number }>('/animals')
+        const items: Animal[] = (res.data || []).map((a) => ({
+          id:                String(a.id),
+          nom:               String(a.nom || ''),
+          espece:            String(a.espece || ''),
+          race:              String(a.race || ''),
+          age:               String(a.age || ''),
+          poids:             a.poids ? String(a.poids) : '',
+          sexe:              String(a.sexe || ''),
+          caracteres:        Array.isArray(a.caractere) ? (a.caractere as string[]) : [],
+          besoins:           String(a.besoins_specifiques || ''),
+          infos_veterinaire: String(a.infos_veterinaire || ''),
+          photo_url:         a.photo_url ? String(a.photo_url) : null,
+        }))
+        setAnimaux(items)
+      } catch {
+        // silently ignore — liste vide
+      } finally {
+        setLoadingAnimaux(false)
+      }
+    })()
   }, [])
-
-  useEffect(() => { loadAnimaux() }, [loadAnimaux])
 
   // ── Calcul complétion ────────────────────────────────────────────────────────
   const fields = [
