@@ -20,7 +20,7 @@ const NIVEAUX_FLOU = [
   { label: 'Révélé',     filter: 'none',          size: 'text-9xl' },
 ]
 
-export default function DevietteGame() {
+export default function DevinetteGame() {
   const [idx, setIdx]       = useState(() => Math.floor(Math.random() * ANIMAUX.length))
   const [niveau, setNiveau] = useState(0)
   const [guess, setGuess]   = useState('')

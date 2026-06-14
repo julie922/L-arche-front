@@ -29,7 +29,7 @@ import MotCacheGame from './pages/jeux/MotCacheGame'
 import SpeedquizGame from './pages/jeux/SpeedquizGame'
 import QuiSuisJeGame from './pages/jeux/QuiSuisJeGame'
 import QuizAnimauxGame from './pages/jeux/QuizAnimauxGame'
-import DevietteGame from './pages/jeux/DevietteGame'
+import DevinetteGame from './pages/jeux/DevinetteGame'
 import PuzzleGame from './pages/jeux/PuzzleGame'
 import TriGame from './pages/jeux/TriGame'
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -85,7 +85,7 @@ function App() {
         <Route path="/jeux/speedquiz"        element={<SpeedquizGame />} />
         <Route path="/jeux/qui-suis-je"      element={<QuiSuisJeGame />} />
         <Route path="/jeux/quiz-animaux"     element={<QuizAnimauxGame />} />
-        <Route path="/jeux/devinette"        element={<DevietteGame />} />
+        <Route path="/jeux/devinette"        element={<DevinetteGame />} />
         <Route path="/jeux/puzzle"           element={<PuzzleGame />} />
         <Route path="/jeux/tri"              element={<TriGame />} />
       </Routes>
