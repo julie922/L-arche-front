@@ -37,6 +37,7 @@ export default function Header() {
         <Link to="/gardiens"       className={linkCls('/gardiens')}>Trouver un gardien</Link>
         <Link to="/faq"            className={linkCls('/faq')}>Aide</Link>
         <Link to="/jeux"           className={linkCls('/jeux')}>Jeux</Link>
+        <Link to="/merch"          className={linkCls('/merch')}>Boutique</Link>
       </div>
 
       <div className="flex items-center gap-3">
