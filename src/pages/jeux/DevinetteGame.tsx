@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 const ANIMAUX = [
@@ -20,14 +20,14 @@ const NIVEAUX_FLOU = [
   { label: 'Révélé',     filter: 'none',          size: 'text-9xl' },
 ]
 
-export default function DevietteGame() {
+export default function DevinetteGame() {
   const [idx, setIdx]       = useState(() => Math.floor(Math.random() * ANIMAUX.length))
   const [niveau, setNiveau] = useState(0)
   const [guess, setGuess]   = useState('')
   const [essais, setEssais] = useState<{ texte: string; correct: boolean }[]>([])
   const [trouve, setTrouve] = useState(false)
   const [abandon, setAbandon] = useState(false)
-  const [timer, setTimer]   = useState<ReturnType<typeof setInterval> | null>(null)
+  const timerRef            = useRef<ReturnType<typeof setInterval> | null>(null)
   const [autoReveal, setAutoReveal] = useState(false)
 
   const animal = ANIMAUX[idx]
@@ -39,9 +39,9 @@ export default function DevietteGame() {
       if (n >= NIVEAUX_FLOU.length - 1) { clearInterval(t); return n }
       return n + 1
     }), 3000)
-    setTimer(t)
+    timerRef.current = t
     return () => clearInterval(t)
-  }, [autoReveal, trouve, abandon])
+  }, [autoReveal, trouve, abandon, niveau])
 
   const deviner = () => {
     const g = guess.trim().toUpperCase()
@@ -49,14 +49,14 @@ export default function DevietteGame() {
     const correct = animal.nom.includes(g) || g.includes(animal.nom)
     setEssais(prev => [...prev, { texte: guess, correct }])
     setGuess('')
-    if (correct) { setTrouve(true); if (timer) clearInterval(timer) }
+    if (correct) { setTrouve(true); if (timerRef.current) clearInterval(timerRef.current) }
     else if (niveau < NIVEAUX_FLOU.length - 1) setNiveau(n => n + 1)
   }
 
   const rejouer = () => {
     setIdx(Math.floor(Math.random() * ANIMAUX.length))
     setNiveau(0); setGuess(''); setEssais([]); setTrouve(false); setAbandon(false); setAutoReveal(false)
-    if (timer) clearInterval(timer)
+    if (timerRef.current) clearInterval(timerRef.current)
   }
 
   return (

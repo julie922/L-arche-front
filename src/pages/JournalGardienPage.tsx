@@ -1,17 +1,24 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
+import { api } from '../services/api'
 
-const MOCK_GARDE = {
-  gardeId: '1',
-  animal: { nom: 'Luna', race: 'Border Collie', emoji: '🐕' },
-  proprietaire: 'Camille R.',
-  gardien: 'Jules Martin',
-  dateDebut: '2025-03-10',
-  dateFin: '2025-03-17',
-  dateAujourdHui: 'Mercredi 12 mars',
-  jourActuel: 3,
-  jourTotal: 7,
-  joursRestants: 5,
+interface Reservation {
+  id: string
+  proprietaire_id: string
+  gardien_id: string
+  animal_id: string
+  date_debut: string
+  date_fin: string
+  statut: string
+  instructions: string | null
+}
+
+interface Animal {
+  id: string
+  nom: string
+  espece: string
+  race: string | null
 }
 
 const CHECKS = [
@@ -30,12 +37,46 @@ const HUMEURS = [
   { value: 1, emoji: '😢', label: 'Difficile' },
 ]
 
+const ESPECE_EMOJI: Record<string, string> = {
+  Chien: '🐕', Chat: '🐈', Lapin: '🐇', Oiseau: '🐦', Rongeur: '🐹',
+  Reptile: '🦎', Poisson: '🐟', Autre: '🐾',
+}
+
+function diffDays(a: string, b: string) {
+  return Math.floor((new Date(b).getTime() - new Date(a).getTime()) / 86400000)
+}
+
 export default function JournalGardienPage() {
-  const g = MOCK_GARDE
+  const { gardeId } = useParams<{ gardeId: string }>()
+  const navigate = useNavigate()
+
+  const [reservation, setReservation] = useState<Reservation | null>(null)
+  const [animal, setAnimal]           = useState<Animal | null>(null)
+  const [loading, setLoading]         = useState(true)
+  const [submitting, setSubmitting]   = useState(false)
+  const [error, setError]             = useState('')
+  const [success, setSuccess]         = useState(false)
+
   const [checks, setChecks]   = useState<Record<string, boolean>>({})
   const [humeur, setHumeur]   = useState<number | null>(null)
   const [note, setNote]       = useState('')
   const [photos, setPhotos]   = useState<File[]>([])
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const resa = await api.get<Reservation>(`/reservations/${gardeId}`)
+        setReservation(resa)
+        const anim = await api.get<Animal>(`/animals/${resa.animal_id}`)
+        setAnimal(anim)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erreur de chargement')
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (gardeId) load()
+  }, [gardeId])
 
   const toggleCheck = (id: string) =>
     setChecks(prev => ({ ...prev, [id]: !prev[id] }))
@@ -45,33 +86,96 @@ export default function JournalGardienPage() {
     setPhotos(prev => [...prev, ...files].slice(0, 6))
   }
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
-    // TODO: POST /api/gardes/:id/journal
+    if (!gardeId) return
+    setSubmitting(true)
+    setError('')
+    try {
+      const checksDone = CHECKS.filter(c => checks[c.id]).map(c => c.label)
+      const humeurLabel = HUMEURS.find(h => h.value === humeur)?.label ?? ''
+      const lignes = [
+        checksDone.length > 0 ? `Checks : ${checksDone.join(', ')}` : null,
+        humeur ? `Humeur : ${humeurLabel} (${humeur}/5)` : null,
+        note || null,
+      ].filter(Boolean)
+
+      await api.post(`/journaux/${gardeId}`, {
+        type_entree: 'message',
+        contenu: lignes.join('\n'),
+      })
+
+      for (const file of photos) {
+        const fd = new FormData()
+        fd.append('media', file)
+        await api.postMultipart(`/journaux/${gardeId}/upload`, fd)
+      }
+
+      setSuccess(true)
+      setTimeout(() => navigate('/dashboard'), 2000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de l\'envoi')
+    } finally {
+      setSubmitting(false)
+    }
   }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
+        <Header />
+        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">Chargement...</div>
+      </div>
+    )
+  }
+
+  if (!reservation) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
+        <Header />
+        <div className="flex-1 flex items-center justify-center text-red-500 text-sm">{error || 'Garde introuvable'}</div>
+      </div>
+    )
+  }
+
+  const jourActuel  = diffDays(reservation.date_debut, new Date().toISOString().split('T')[0]) + 1
+  const joursRestants = diffDays(new Date().toISOString().split('T')[0], reservation.date_fin)
+  const animalEmoji = animal ? (ESPECE_EMOJI[animal.espece] ?? '🐾') : '🐾'
+  const animalNom   = animal?.nom ?? '…'
+  const animalRace  = animal?.race ?? animal?.espece ?? ''
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
 
-      {/* Navbar */}
-      <Header isConnected />
+      <Header />
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
+
+        {success && (
+          <div className="mb-4 rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 font-bold text-center">
+            Mise à jour envoyée ! Redirection...
+          </div>
+        )}
+        {error && <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>}
 
         {/* Carte garde */}
         <div className="rounded-2xl px-5 py-4 mb-6 flex items-center justify-between" style={{ backgroundColor: '#3A5220' }}>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-[#D4E6C3] flex items-center justify-center text-2xl shrink-0">
-              {g.animal.emoji}
+              {animalEmoji}
             </div>
             <div>
-              <h1 className="text-lg font-black text-white">{g.animal.nom} — {g.animal.race}</h1>
-              <p className="text-xs text-white/70">Garde de {g.proprietaire} · {g.dateDebut.split('-')[2].replace(/^0/, '')}-{g.dateFin.split('-')[2].replace(/^0/, '')} mars 2025</p>
-              <p className="text-xs text-white/60">Aujourd'hui : {g.dateAujourdHui} · Jour {g.jourActuel}</p>
+              <h1 className="text-lg font-black text-white">{animalNom} — {animalRace}</h1>
+              <p className="text-xs text-white/70">
+                Du {new Date(reservation.date_debut).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} au {new Date(reservation.date_fin).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+              <p className="text-xs text-white/60">
+                Aujourd'hui · Jour {jourActuel}
+              </p>
             </div>
           </div>
           <div className="text-right shrink-0">
-            <p className="text-3xl font-black text-white">J-{g.joursRestants}</p>
+            <p className="text-3xl font-black text-white">J-{joursRestants}</p>
             <p className="text-xs font-bold tracking-widest" style={{ color: '#A8C539' }}>AVANT LA FIN</p>
           </div>
         </div>
@@ -106,17 +210,14 @@ export default function JournalGardienPage() {
 
           {/* Humeur */}
           <div className="bg-white rounded-2xl p-5">
-            <h2 className="text-base font-black text-gray-900 mb-4">Comment va {g.animal.nom} aujourd'hui ?</h2>
+            <h2 className="text-base font-black text-gray-900 mb-4">Comment va {animalNom} aujourd'hui ?</h2>
             <div className="flex justify-center gap-4">
               {HUMEURS.map(h => (
                 <button key={h.value} type="button" onClick={() => setHumeur(h.value)}
                   className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                     humeur === h.value ? 'scale-110' : 'opacity-60 hover:opacity-80'
                   }`}>
-                  <span className={`text-4xl transition-all ${humeur === h.value ? 'filter-none' : ''}`}
-                    style={{ filter: humeur === h.value ? 'none' : 'grayscale(0.3)' }}>
-                    {h.emoji}
-                  </span>
+                  <span className="text-4xl">{h.emoji}</span>
                   {humeur === h.value && (
                     <span className="text-xs font-bold" style={{ color: '#3A5220' }}>{h.label}</span>
                   )}
@@ -129,7 +230,7 @@ export default function JournalGardienPage() {
           <div className="bg-white rounded-2xl p-5">
             <h2 className="text-base font-black text-gray-900 mb-3">Note du jour</h2>
             <textarea rows={4} value={note} onChange={e => setNote(e.target.value)}
-              placeholder={`${g.animal.nom} est en pleine forme ! Grande balade ce matin au parc...`}
+              placeholder={`${animalNom} est en pleine forme ! Grande balade ce matin au parc...`}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#3A5220] focus:border-transparent placeholder-gray-400" />
           </div>
 
@@ -156,10 +257,10 @@ export default function JournalGardienPage() {
           </div>
 
           {/* Bouton envoi */}
-          <button type="submit"
-            className="w-full py-4 rounded-2xl font-bold text-white text-base hover:opacity-90 transition"
+          <button type="submit" disabled={submitting}
+            className="w-full py-4 rounded-2xl font-bold text-white text-base hover:opacity-90 transition disabled:opacity-50"
             style={{ backgroundColor: '#3A5220' }}>
-            Envoyer la mise à jour à {g.proprietaire.split(' ')[0]} →
+            {submitting ? 'Envoi en cours...' : 'Envoyer la mise à jour →'}
           </button>
         </form>
       </main>

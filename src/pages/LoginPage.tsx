@@ -1,23 +1,35 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import Header from '../components/Header'
 
 export default function LoginPage() {
+  const { login } = useAuth()
+  const navigate = useNavigate()
   const [rememberMe, setRememberMe] = useState(false)
   const [form, setForm] = useState({ email: '', password: '' })
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: appel API
+    setError('')
+    setIsSubmitting(true)
+    try {
+      const me = await login(form.email, form.password)
+      if (me.role === 'admin') navigate('/admin')
+      else if (me.est_gardien) navigate('/dashboard')
+      else navigate('/dashboard-proprio')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Identifiants incorrects')
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Nunito', sans-serif" }}>
 
-      {/* Navbar noire */}
-      <header className="w-full h-16 bg-[#0D0D0D]" />
-
-      {/* Ligne bleue */}
-      <div className="w-full h-[3px] bg-[#4A90D9]" />
+      <Header />
 
       {/* Contenu principal */}
       <main
@@ -25,12 +37,12 @@ export default function LoginPage() {
         style={{ backgroundColor: '#F0EBE1' }}
       >
         {/* Tiret bleu décoratif */}
-        <div className="w-8 h-[3px] bg-[#4A90D9] rounded-full mb-8" />
+        <div className="w-8 h-0.75 bg-[#4A90D9] rounded-full mb-8" />
 
         <img src="/logo1.png" alt="L'Arche" className="h-16 w-auto mb-8" />
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm w-full max-w-[480px] px-10 py-8 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm w-full max-w-120 px-10 py-8 mb-6">
 
           {/* Icône patte */}
           <div className="flex justify-center mb-5">
@@ -47,6 +59,12 @@ export default function LoginPage() {
             </h1>
             <p className="text-sm text-gray-500">Connectez-vous à votre espace de L'Arche</p>
           </div>
+
+          {error && (
+            <div className="mb-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
@@ -99,10 +117,11 @@ export default function LoginPage() {
             {/* Bouton */}
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl font-bold text-white text-base transition-opacity hover:opacity-90"
+              disabled={isSubmitting}
+              className="w-full py-3.5 rounded-xl font-bold text-white text-base transition-opacity hover:opacity-90 disabled:opacity-50"
               style={{ backgroundColor: '#3A5220' }}
             >
-              Se connecter
+              {isSubmitting ? 'Connexion...' : 'Se connecter'}
             </button>
           </form>
         </div>
@@ -120,7 +139,7 @@ export default function LoginPage() {
         </p>
 
         {/* Tiret bleu décoratif */}
-        <div className="w-8 h-[3px] bg-[#4A90D9] rounded-full mt-8" />
+        <div className="w-8 h-0.75 bg-[#4A90D9] rounded-full mt-8" />
       </main>
     </div>
   )

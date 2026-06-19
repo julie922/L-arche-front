@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from '../components/Header'
-import { MOCK_PRODUITS, CATEGORIES_MERCH, type Produit } from '../data/merch'
+import { CATEGORIES_MERCH, type Produit } from '../data/merch'
+import { api } from '../services/api'
 
 interface CartItem { produit: Produit; quantite: number; variant?: string }
 
@@ -17,9 +18,12 @@ function CarteProduit({ p, onAjouter }: { p: Produit; onAjouter: (p: Produit, va
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex flex-col">
-      {/* Image placeholder */}
-      <div className="h-44 bg-gray-200 flex items-center justify-center shrink-0">
-        <span className="text-4xl opacity-20">📦</span>
+      {/* Image */}
+      <div className="h-44 bg-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
+        {p.photo
+          ? <img src={p.photo} alt={p.nom} className="w-full h-full object-cover" />
+          : <span className="text-4xl opacity-20">📦</span>
+        }
       </div>
 
       {/* Infos */}
@@ -80,8 +84,10 @@ function Panier({ items, onClose, onRemove }: {
               <p className="text-xs text-gray-400">Ajoutez des articles pour commencer</p>
             </div>
           ) : items.map(item => (
-            <div key={item.produit.id} className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gray-100 rounded-xl shrink-0" />
+            <div key={`${item.produit.id}-${item.variant}`} className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gray-100 rounded-xl shrink-0 overflow-hidden">
+                {item.produit.photo && <img src={item.produit.photo} alt="" className="w-full h-full object-cover" />}
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-gray-800 truncate">{item.produit.nom}</p>
                 {item.variant && <p className="text-xs text-gray-400">{item.variant}</p>}
@@ -102,7 +108,7 @@ function Panier({ items, onClose, onRemove }: {
             <button type="button"
               className="w-full py-3.5 rounded-xl font-bold text-white hover:opacity-90 transition"
               style={{ backgroundColor: '#3A5220' }}>
-              Commander → {/* TODO: lier au paiement */}
+              Commander →
             </button>
             <p className="text-xs text-gray-400 text-center mt-2">Paiement sécurisé — à venir</p>
           </div>
@@ -114,11 +120,19 @@ function Panier({ items, onClose, onRemove }: {
 
 // ─── Page principale ──────────────────────────────────────────────────────────
 export default function MerchPage() {
+  const [produits,  setProduits]  = useState<Produit[]>([])
+  const [loading,   setLoading]   = useState(true)
   const [categorie, setCategorie] = useState('tous')
   const [prixMax,   setPrixMax]   = useState(50)
   const [tri,       setTri]       = useState<'pertinence' | 'prix-asc' | 'prix-desc'>('pertinence')
   const [cart,      setCart]      = useState<CartItem[]>([])
   const [cartOpen,  setCartOpen]  = useState(false)
+
+  useEffect(() => {
+    api.get<Produit[]>('/produits')
+      .then(data => setProduits(data))
+      .finally(() => setLoading(false))
+  }, [])
 
   const ajouterAuPanier = (p: Produit, variant?: string) => {
     setCart(prev => {
@@ -133,9 +147,9 @@ export default function MerchPage() {
 
   const nbArticles = cart.reduce((s, i) => s + i.quantite, 0)
 
-  let filtered = MOCK_PRODUITS.filter(p => {
-    const matchCat   = categorie === 'tous' || p.categorie === categorie
-    const matchPrix  = p.prix <= prixMax
+  let filtered = produits.filter(p => {
+    const matchCat  = categorie === 'tous' || p.categorie === categorie
+    const matchPrix = p.prix <= prixMax
     return matchCat && matchPrix
   })
 
@@ -222,17 +236,21 @@ export default function MerchPage() {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {filtered.map(p => (
-              <CarteProduit key={p.id} p={p} onAjouter={ajouterAuPanier} />
-            ))}
-            {filtered.length === 0 && (
-              <div className="col-span-4 text-center py-16">
-                <p className="text-3xl mb-2">🛍️</p>
-                <p className="font-bold text-gray-700">Aucun produit dans cette gamme</p>
-              </div>
-            )}
-          </div>
+          {loading ? (
+            <div className="flex justify-center py-16 text-gray-400 text-sm">Chargement...</div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {filtered.map(p => (
+                <CarteProduit key={p.id} p={p} onAjouter={ajouterAuPanier} />
+              ))}
+              {filtered.length === 0 && (
+                <div className="col-span-4 text-center py-16">
+                  <p className="text-3xl mb-2">🛍️</p>
+                  <p className="font-bold text-gray-700">Aucun produit dans cette gamme</p>
+                </div>
+              )}
+            </div>
+          )}
         </main>
       </div>
 

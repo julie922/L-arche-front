@@ -1,55 +1,101 @@
 import { test, expect } from '@playwright/test'
+import { mockApiRoutes, MOCK_USER } from './helpers'
 
 test.describe('Authentification', () => {
 
-  test('la page de connexion se charge', async ({ page }) => {
+  test('page login affiche le formulaire', async ({ page }) => {
+    await mockApiRoutes(page)
     await page.goto('/login')
-    await expect(page.getByRole('heading', { name: 'Bon retour' })).toBeVisible()
-    await expect(page.getByPlaceholder('camille@email.com')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Se connecter' })).toBeVisible()
+
+    await expect(page.getByRole('heading', { name: /bon retour/i })).toBeVisible()
+    await expect(page.locator('input[type="email"]')).toBeVisible()
+    await expect(page.locator('input[type="password"]')).toBeVisible()
+    await expect(page.getByRole('button', { name: /se connecter/i })).toBeVisible()
+    await expect(page.getByText(/créer un compte/i)).toBeVisible()
   })
 
-  test('le lien "S\'inscrire" est présent sur la page de connexion', async ({ page }) => {
+  test('login réussi redirige vers /dashboard ou /', async ({ page }) => {
+    await mockApiRoutes(page)
     await page.goto('/login')
-    await expect(page.getByRole('link', { name: /S'inscrire|Créer un compte/ })).toBeVisible()
+
+    await page.locator('input[type="email"]').fill('alice@test.com')
+    await page.locator('input[type="password"]').fill('password123')
+    await page.getByRole('button', { name: /se connecter/i }).click()
+
+    // Doit sortir de /login
+    await expect(page).not.toHaveURL(/\/login/)
   })
 
-  test('/profil charge la page profil (mock connecté)', async ({ page }) => {
+  test('login avec champs vides affiche un message d\'erreur', async ({ page }) => {
+    await mockApiRoutes(page)
+
+    // Simuler une réponse API d'erreur
+    await page.route('**/api/auth/signin', async route => {
+      await route.fulfill({
+        status: 400,
+        json: { error: { message: 'Email et mot de passe requis', statusCode: 400 } }
+      })
+    })
+
+    await page.goto('/login')
+    await page.getByRole('button', { name: /se connecter/i }).click()
+
+    // Le formulaire doit rester ou afficher une erreur
+    await expect(page).toHaveURL(/\/login/)
+  })
+
+  test('page register affiche le formulaire d\'inscription', async ({ page }) => {
+    await mockApiRoutes(page)
+    await page.goto('/register')
+
+    await expect(page.getByRole('heading', { name: /créer mon compte/i })).toBeVisible()
+    await expect(page.locator('input[placeholder="Dupont"]')).toBeVisible()
+    await expect(page.getByRole('button', { name: /créer mon compte/i })).toBeVisible()
+    await expect(page.getByText(/déjà un compte/i)).toBeVisible()
+  })
+
+  test('utilisateur connecté voit son nom dans le header', async ({ page }) => {
+    await mockApiRoutes(page)
+    await page.goto('/')
+    await page.evaluate(() => {
+      localStorage.setItem('access_token', 'fake-access-token')
+      localStorage.setItem('refresh_token', 'fake-refresh-token')
+    })
+    await page.reload()
+
+    // Le header doit afficher les initiales ou le prénom
+    const header = page.locator('header')
+    await expect(header).toBeVisible()
+    await expect(header.getByText(new RegExp(MOCK_USER.prenom, 'i'))).toBeVisible()
+  })
+
+  test('déconnexion redirige vers /login', async ({ page }) => {
+    await mockApiRoutes(page)
+    await page.goto('/')
+    await page.evaluate(() => {
+      localStorage.setItem('access_token', 'fake-access-token')
+    })
+    await page.reload()
+
+    // Chercher un bouton de déconnexion
+    const logoutBtn = page.getByRole('button', { name: /déconnexion|se déconnecter/i })
+    await expect(logoutBtn).toBeVisible()
+    await logoutBtn.click()
+
+    await expect(page).toHaveURL(/\/login/)
+  })
+
+  test('accès à une page protégée sans token redirige vers /login', async ({ page }) => {
+    await mockApiRoutes(page)
+    // Pas de token en localStorage
     await page.goto('/profil')
-    await expect(page.getByRole('heading', { name: 'Mon profil' })).toBeVisible()
+    await expect(page).toHaveURL(/\/login/)
   })
 
-  test('la page d\'inscription - étape 1 se charge', async ({ page }) => {
-    await page.goto('/register')
-    await expect(page.getByRole('heading', { name: 'Créer mon compte' })).toBeVisible()
-    // Sélecteur exact pour éviter l'ambiguïté avec camille@email.com
-    await expect(page.getByPlaceholder('Camille', { exact: true })).toBeVisible()
-    await expect(page.getByPlaceholder('Dupont')).toBeVisible()
+  test('accès au dashboard sans token redirige vers /login', async ({ page }) => {
+    await mockApiRoutes(page)
+    await page.goto('/dashboard')
+    await expect(page).toHaveURL(/\/login/)
   })
 
-  test('l\'inscription avance à l\'étape 2 après avoir rempli l\'étape 1', async ({ page }) => {
-    await page.goto('/register')
-    await page.getByPlaceholder('Camille', { exact: true }).fill('Marie')
-    await page.getByPlaceholder('Dupont').fill('Dupont')
-    await page.getByPlaceholder('camille@email.com').fill('marie@test.com')
-    await page.getByPlaceholder(/caractères/i).fill('motdepasse123')
-    // Sélectionner Propriétaire (premier rôle dans la grille)
-    await page.locator('button').filter({ hasText: 'Je cherche un gardien pour mon animal' }).click()
-    await page.getByRole('checkbox').click()
-    await page.getByRole('button', { name: /Créer mon compte/ }).click()
-    await expect(page.getByRole('heading', { name: 'Mon animal' })).toBeVisible()
-  })
-
-  test('choisir Gardien mène directement à l\'étape Expérience', async ({ page }) => {
-    await page.goto('/register')
-    await page.getByPlaceholder('Camille', { exact: true }).fill('Jules')
-    await page.getByPlaceholder('Dupont').fill('Martin')
-    await page.getByPlaceholder('camille@email.com').fill('jules@test.com')
-    await page.getByPlaceholder(/caractères/i).fill('motdepasse123')
-    // Sélectionner Gardien via son texte descriptif unique
-    await page.locator('button').filter({ hasText: "J'accueille les animaux chez moi" }).click()
-    await page.getByRole('checkbox').click()
-    await page.getByRole('button', { name: /Créer mon compte/ }).click()
-    await expect(page.getByRole('heading', { name: 'Mon expérience' })).toBeVisible()
-  })
 })

@@ -1,11 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
+import { api } from '../services/api'
 
-const MOCK_GARDE = {
-  id: '1',
-  animal:  'Luna',
-  gardien: { nom: 'Jules', prenom: 'Jules', id: 'jules-martin' },
-  dates:   '10 au 17 mars 2025',
+interface Reservation {
+  id: string
+  proprietaire_id: string
+  gardien_id: string
+  animal_id: string
+  date_debut: string
+  date_fin: string
+  statut: string
+}
+
+interface Animal {
+  id: string
+  nom: string
+  espece: string
+}
+
+interface Gardien {
+  id: string
+  nom: string
+  prenom: string
 }
 
 const CRITERES = [
@@ -36,35 +53,117 @@ function StarRating({ value, onChange, size = 'lg' }: { value: number; onChange:
 }
 
 export default function FinDeGardePage() {
-  const g = MOCK_GARDE
-  const [noteGlobale, setNoteGlobale]   = useState(0)
+  const { gardeId } = useParams<{ gardeId: string }>()
+  const navigate = useNavigate()
+
+  const [reservation, setReservation] = useState<Reservation | null>(null)
+  const [animal, setAnimal]           = useState<Animal | null>(null)
+  const [gardien, setGardien]         = useState<Gardien | null>(null)
+  const [loading, setLoading]         = useState(true)
+  const [submitting, setSubmitting]   = useState(false)
+  const [error, setError]             = useState('')
+  const [done, setDone]               = useState(false)
+
+  const [noteGlobale, setNoteGlobale]     = useState(0)
   const [notesCriteres, setNotesCriteres] = useState<Record<string, number>>({})
-  const [commentaire, setCommentaire]   = useState('')
-  const [recommande, setRecommande]     = useState(false)
+  const [commentaire, setCommentaire]     = useState('')
+  const [recommande, setRecommande]       = useState(false)
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const resa = await api.get<Reservation>(`/reservations/${gardeId}`)
+        setReservation(resa)
+        const [anim, gard] = await Promise.all([
+          api.get<Animal>(`/animals/${resa.animal_id}`),
+          api.get<Gardien>(`/users/gardiens/${resa.gardien_id}`),
+        ])
+        setAnimal(anim)
+        setGardien(gard)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erreur de chargement')
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (gardeId) load()
+  }, [gardeId])
 
   const setCritere = (id: string, val: number) =>
     setNotesCriteres(prev => ({ ...prev, [id]: val }))
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
-    // TODO: POST /api/gardes/:id/avis
+    if (!reservation || !noteGlobale) return
+    setSubmitting(true)
+    setError('')
+    try {
+      // Marquer la garde comme terminée si ce n'est pas déjà fait
+      if (reservation.statut === 'confirmee') {
+        await api.patch(`/reservations/${gardeId}/complete`, {})
+      }
+      // Publier l'avis
+      const criteriasText = Object.entries(notesCriteres)
+        .map(([id, val]) => `${CRITERES.find(c => c.id === id)?.label}: ${val}/5`)
+        .join(', ')
+      const fullCommentaire = criteriasText && commentaire
+        ? `${commentaire}\n[${criteriasText}]`
+        : commentaire || (criteriasText ? `[${criteriasText}]` : '')
+
+      await api.post('/reviews', {
+        reservation_id: reservation.id,
+        cible_id: reservation.gardien_id,
+        note: noteGlobale,
+        commentaire: fullCommentaire || null,
+        recommande,
+      })
+      setDone(true)
+      setTimeout(() => navigate('/dashboard-proprio'), 2500)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la publication')
+    } finally {
+      setSubmitting(false)
+    }
   }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
+        <Header />
+        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">Chargement...</div>
+      </div>
+    )
+  }
+
+  const gardienPrenom = gardien?.prenom || gardien?.nom || 'le gardien'
+  const animalNom = animal?.nom || '…'
+  const dateRange = reservation
+    ? `${new Date(reservation.date_debut).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} au ${new Date(reservation.date_fin).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`
+    : ''
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F0EBE1', fontFamily: "'Nunito', sans-serif" }}>
 
-      {/* Navbar minimale */}
-      <Header isConnected />
+      <Header />
 
       <main className="flex-1 flex flex-col items-center px-4 py-10">
+
+        {done && (
+          <div className="w-full max-w-lg mb-6 rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 font-bold text-center">
+            Avis publié ! Merci pour votre retour. Redirection...
+          </div>
+        )}
+        {error && (
+          <div className="w-full max-w-lg mb-6 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
+        )}
 
         {/* En-tête */}
         <div className="text-center mb-8">
           <p className="text-xs font-black tracking-widest mb-2" style={{ color: '#5A7A1A' }}>FIN DE GARDE</p>
           <h1 className="text-3xl font-black text-gray-900 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-            {g.animal} est rentrée à la maison
+            {animalNom} est rentré(e) à la maison
           </h1>
-          <p className="text-sm text-gray-500">Garde du {g.dates} - {g.gardien.nom}</p>
+          <p className="text-sm text-gray-500">Garde du {dateRange} — {gardienPrenom}</p>
         </div>
 
         {/* Indicateur d'étapes */}
@@ -86,7 +185,7 @@ export default function FinDeGardePage() {
                   </span>
                 </div>
                 {i < ETAPES.length - 1 && (
-                  <div className="w-16 h-[2px] mt-[18px]" style={{ backgroundColor: i < 1 ? '#D91B5C' : '#E5E7EB' }} />
+                  <div className="w-16 h-0.5 mt-4.5" style={{ backgroundColor: i < 1 ? '#D91B5C' : '#E5E7EB' }} />
                 )}
               </div>
             )
@@ -96,7 +195,7 @@ export default function FinDeGardePage() {
         {/* Formulaire avis */}
         <div className="bg-white rounded-2xl shadow-sm w-full max-w-lg px-8 py-8">
           <h2 className="text-xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Votre avis sur {g.gardien.prenom}
+            Votre avis sur {gardienPrenom}
           </h2>
           <p className="text-sm text-gray-400 mb-6">Votre retour aide toute la communauté</p>
 
@@ -106,6 +205,7 @@ export default function FinDeGardePage() {
             <div className="flex justify-center">
               <StarRating value={noteGlobale} onChange={setNoteGlobale} size="lg" />
             </div>
+            {!noteGlobale && <p className="text-xs text-center text-gray-400">Cliquez sur une étoile pour noter</p>}
 
             {/* Notes par critère */}
             <div className="grid grid-cols-2 gap-3">
@@ -124,7 +224,7 @@ export default function FinDeGardePage() {
             <div className="flex flex-col gap-1">
               <label className="text-sm font-bold text-gray-800">Votre commentaire</label>
               <textarea rows={4} value={commentaire} onChange={e => setCommentaire(e.target.value)}
-                placeholder={`${g.gardien.prenom} est exceptionnel ! ${g.animal} était aux anges...`}
+                placeholder={`${gardienPrenom} est exceptionnel ! ${animalNom} était aux anges...`}
                 className="border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#3A5220] focus:border-transparent placeholder-gray-400" />
             </div>
 
@@ -133,15 +233,15 @@ export default function FinDeGardePage() {
               <input type="checkbox" checked={recommande} onChange={e => setRecommande(e.target.checked)}
                 className="w-4 h-4 rounded" style={{ accentColor: '#D91B5C' }} />
               <span className="text-sm font-semibold" style={{ color: '#D91B5C' }}>
-                Je recommande {g.gardien.prenom} à d'autres propriétaires
+                Je recommande {gardienPrenom} à d'autres propriétaires
               </span>
             </label>
 
             {/* Bouton */}
-            <button type="submit"
-              className="w-full py-3.5 rounded-xl font-bold text-white text-sm hover:opacity-90 transition"
+            <button type="submit" disabled={submitting || !noteGlobale}
+              className="w-full py-3.5 rounded-xl font-bold text-white text-sm hover:opacity-90 transition disabled:opacity-50"
               style={{ backgroundColor: '#3A5220' }}>
-              Publier mon avis →
+              {submitting ? 'Publication...' : 'Publier mon avis →'}
             </button>
           </form>
         </div>

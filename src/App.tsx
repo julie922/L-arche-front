@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 import MessageriePage from './pages/MessageriePage'
@@ -28,7 +29,7 @@ import MotCacheGame from './pages/jeux/MotCacheGame'
 import SpeedquizGame from './pages/jeux/SpeedquizGame'
 import QuiSuisJeGame from './pages/jeux/QuiSuisJeGame'
 import QuizAnimauxGame from './pages/jeux/QuizAnimauxGame'
-import DevietteGame from './pages/jeux/DevietteGame'
+import DevinetteGame from './pages/jeux/DevinetteGame'
 import PuzzleGame from './pages/jeux/PuzzleGame'
 import TriGame from './pages/jeux/TriGame'
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -45,6 +46,7 @@ import MerchPage from './pages/MerchPage'
 function App() {
   return (
     <BrowserRouter>
+      <AuthProvider>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -52,16 +54,16 @@ function App() {
         <Route path="/fiches-especes" element={<FichesEspecesPage />} />
         <Route path="/fiches-especes/:id" element={<FicheDetailPage />} />
         <Route path="/fiches-especes/:id/:sousId" element={<SousEspeceDetailPage />} />
-        <Route path="/profil" element={<PrivateRoute><ProfilPage /></PrivateRoute>} />
-        <Route path="/dashboard" element={<DashboardGardienPage />} />
-        <Route path="/dashboard-proprio" element={<DashboardProprioPage />} />
+        <Route path="/profil"            element={<PrivateRoute><ProfilPage /></PrivateRoute>} />
+        <Route path="/dashboard"         element={<PrivateRoute><DashboardGardienPage /></PrivateRoute>} />
+        <Route path="/dashboard-proprio" element={<PrivateRoute><DashboardProprioPage /></PrivateRoute>} />
         <Route path="/faq" element={<FaqPage />} />
-        <Route path="/garde/:gardeId/journal" element={<JournalGardienPage />} />
-        <Route path="/garde/:gardeId/suivi"   element={<JournalProprioPage />} />
-        <Route path="/garde/:gardeId/fin"     element={<FinDeGardePage />} />
+        <Route path="/garde/:gardeId/journal" element={<PrivateRoute><JournalGardienPage /></PrivateRoute>} />
+        <Route path="/garde/:gardeId/suivi"   element={<PrivateRoute><JournalProprioPage /></PrivateRoute>} />
+        <Route path="/garde/:gardeId/fin"     element={<PrivateRoute><FinDeGardePage /></PrivateRoute>} />
         <Route path="/gardiens" element={<RechercheGardiensPage />} />
         <Route path="/gardiens/:id" element={<GardienProfilPage />} />
-        <Route path="/gardiens/:id/reserver" element={<ReservationPage />} />
+        <Route path="/gardiens/:id/reserver" element={<PrivateRoute><ReservationPage /></PrivateRoute>} />
         <Route path="/admin"                element={<AdminGuard><AdminDashboard /></AdminGuard>} />
         <Route path="/admin/utilisateurs"   element={<AdminGuard><AdminUtilisateurs /></AdminGuard>} />
         <Route path="/admin/verifications"  element={<AdminGuard><AdminVerifications /></AdminGuard>} />
@@ -83,10 +85,11 @@ function App() {
         <Route path="/jeux/speedquiz"        element={<SpeedquizGame />} />
         <Route path="/jeux/qui-suis-je"      element={<QuiSuisJeGame />} />
         <Route path="/jeux/quiz-animaux"     element={<QuizAnimauxGame />} />
-        <Route path="/jeux/devinette"        element={<DevietteGame />} />
+        <Route path="/jeux/devinette"        element={<DevinetteGame />} />
         <Route path="/jeux/puzzle"           element={<PuzzleGame />} />
         <Route path="/jeux/tri"              element={<TriGame />} />
       </Routes>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

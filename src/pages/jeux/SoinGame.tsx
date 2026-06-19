@@ -46,6 +46,7 @@ export default function SoinGame() {
   const [message, setMessage] = useState('')
   const [jour, setJour] = useState(1)
   const [fini, setFini] = useState(false)
+  const [tipIdx] = useState(() => Math.floor(Math.random() * MESSAGES.length))
 
   const agir = (action: typeof ACTIONS[0]) => {
     setJauges(prev => {
@@ -166,7 +167,7 @@ export default function SoinGame() {
             </button>
 
             <p className="text-xs text-gray-400 text-center">
-              {MESSAGES[Math.floor(Math.random() * MESSAGES.length)]}
+              {MESSAGES[tipIdx]}
             </p>
           </div>
         )}

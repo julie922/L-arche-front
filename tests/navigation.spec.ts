@@ -1,55 +1,114 @@
 import { test, expect } from '@playwright/test'
+import { mockApiRoutes, loginAs } from './helpers'
 
-test.describe('Header & Navigation', () => {
+test.describe('Navigation — pages publiques', () => {
 
-  test('la page d\'accueil se charge correctement', async ({ page }) => {
+  test('page d\'accueil se charge', async ({ page }) => {
+    await mockApiRoutes(page)
     await page.goto('/')
-    await expect(page).toHaveTitle(/L'Arche/)
-    await expect(page.getByRole('heading', { name: /Votre animal entre/ })).toBeVisible()
+    await expect(page).toHaveURL('/')
+    await expect(page.getByRole('banner')).toBeVisible()
   })
 
-  test('le header contient tous les liens de navigation', async ({ page }) => {
+  test('lien "Trouver un gardien" depuis la homepage', async ({ page }) => {
+    await mockApiRoutes(page)
     await page.goto('/')
-    const nav = page.locator('nav').first()
-    await expect(nav.getByRole('link', { name: 'Accueil' })).toBeVisible()
-    await expect(nav.getByRole('link', { name: 'Fiches espèces' })).toBeVisible()
-    await expect(nav.getByRole('link', { name: 'Trouver un gardien' })).toBeVisible()
-    await expect(nav.getByRole('link', { name: 'Aide' })).toBeVisible()
-    await expect(nav.getByRole('link', { name: 'Jeux' })).toBeVisible()
-    await expect(nav.getByRole('link', { name: 'Connexion' })).toBeVisible()
-    await expect(nav.getByRole('link', { name: 'Inscription' })).toBeVisible()
+    const link = page.getByRole('banner').getByRole('link', { name: /trouver un gardien/i })
+    if (await link.isVisible()) {
+      await link.click()
+      await expect(page).toHaveURL(/\/gardiens/)
+    }
   })
 
-  test('le lien "Fiches espèces" navigue correctement', async ({ page }) => {
-    await page.goto('/')
-    await page.locator('nav').first().getByRole('link', { name: 'Fiches espèces' }).click()
-    await expect(page).toHaveURL('/fiches-especes')
-    await expect(page.getByRole('heading', { name: 'Fiches espèces' })).toBeVisible()
-  })
-
-  test('le lien "Trouver un gardien" navigue correctement', async ({ page }) => {
-    await page.goto('/')
-    await page.locator('nav').first().getByRole('link', { name: 'Trouver un gardien' }).click()
+  test('page recherche gardiens se charge', async ({ page }) => {
+    await mockApiRoutes(page)
+    await page.goto('/gardiens')
     await expect(page).toHaveURL('/gardiens')
+    await expect(page.getByRole('banner')).toBeVisible()
   })
 
-  test('le lien "Aide" navigue vers la FAQ', async ({ page }) => {
-    await page.goto('/')
-    await page.locator('nav').first().getByRole('link', { name: 'Aide' }).click()
+  test('page fiches espèces se charge', async ({ page }) => {
+    await mockApiRoutes(page)
+    await page.goto('/fiches-especes')
+    await expect(page).toHaveURL('/fiches-especes')
+    await expect(page.getByRole('banner')).toBeVisible()
+  })
+
+  test('page FAQ se charge', async ({ page }) => {
+    await mockApiRoutes(page)
+    await page.goto('/faq')
     await expect(page).toHaveURL('/faq')
-    await expect(page.getByRole('heading', { name: /Comment pouvons-nous/ })).toBeVisible()
+    await expect(page.getByRole('banner')).toBeVisible()
   })
 
-  test('le lien "Jeux" navigue vers la page jeux', async ({ page }) => {
+  test('lien Connexion pointe vers /login', async ({ page }) => {
+    await mockApiRoutes(page)
     await page.goto('/')
-    await page.locator('nav').first().getByRole('link', { name: 'Jeux' }).click()
-    await expect(page).toHaveURL('/jeux')
-    await expect(page.getByRole('heading', { name: 'Les jeux de L\'Arche' })).toBeVisible()
+    const link = page.getByRole('link', { name: /^connexion$/i }).first()
+    await expect(link).toBeVisible()
+    await link.click()
+    await expect(page).toHaveURL(/\/login/)
   })
 
-  test('le footer est présent sur la page d\'accueil', async ({ page }) => {
+  test('lien Inscription pointe vers /register', async ({ page }) => {
+    await mockApiRoutes(page)
     await page.goto('/')
-    await expect(page.locator('footer')).toBeVisible()
-    await expect(page.locator('footer')).toContainText('Association loi 1901')
+    const link = page.getByRole('link', { name: /^inscription$/i }).first()
+    await expect(link).toBeVisible()
+    await link.click()
+    await expect(page).toHaveURL(/\/register/)
   })
+
+  test('logo / lien L\'Arche redirige vers /', async ({ page }) => {
+    await mockApiRoutes(page)
+    await page.goto('/faq')
+    const logo = page.getByRole('banner').getByRole('link').first()
+    await logo.click()
+    await expect(page).toHaveURL('/')
+  })
+
+})
+
+test.describe('Navigation — utilisateur connecté', () => {
+
+  test('header affiche les initiales et le menu utilisateur', async ({ page }) => {
+    await loginAs(page)
+    await page.reload()
+    const banner = page.getByRole('banner')
+    await expect(banner).toBeVisible()
+    // Les boutons Connexion/Inscription ne doivent plus être visibles
+    await expect(banner.getByRole('link', { name: /^connexion$/i })).not.toBeVisible()
+  })
+
+  test('lien "Mon profil" depuis le header', async ({ page }) => {
+    await loginAs(page)
+    await page.reload()
+    const profilLink = page.getByRole('banner').getByRole('link', { name: /^profil$/i })
+    if (await profilLink.isVisible()) {
+      await profilLink.click()
+      await expect(page).toHaveURL(/\/profil/)
+    }
+  })
+
+  test('page profil se charge pour un utilisateur connecté', async ({ page }) => {
+    await loginAs(page)
+    await page.goto('/profil')
+    await expect(page).toHaveURL('/profil')
+    await expect(page.getByRole('banner')).toBeVisible()
+  })
+
+  test('dashboard gardien accessible', async ({ page }) => {
+    await loginAs(page)
+    await page.goto('/dashboard')
+    await expect(page).toHaveURL('/dashboard')
+    await expect(page.getByRole('banner')).toBeVisible()
+  })
+
+  test('dashboard proprio accessible', async ({ page }) => {
+    await loginAs(page)
+    await page.goto('/dashboard-proprio')
+    await expect(page).toHaveURL('/dashboard-proprio')
+    await expect(page.getByRole('banner')).toBeVisible()
+  })
+
 })

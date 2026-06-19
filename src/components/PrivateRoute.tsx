@@ -1,9 +1,10 @@
-import { Navigate } from 'react-router-dom'
-
-// TODO: remplacer par vérification JWT quand le back sera prêt
-const MOCK_IS_CONNECTED = true
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function PrivateRoute({ children }: { children: React.ReactNode }) {
-  if (!MOCK_IS_CONNECTED) return <Navigate to="/login" replace />
-  return <>{children}</>
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) return null;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <>{children}</>;
 }

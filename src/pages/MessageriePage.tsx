@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+﻿import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface Message {
   id: number
   texte: string
@@ -24,24 +24,24 @@ interface Conversation {
   messages: Message[]
 }
 
-// ─── Mock données ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ Mock donnÃ©es â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const MOCK_CONVERSATIONS: Conversation[] = [
   {
     id: 'jules-martin',
     nom: 'Jules Martin',
     avatar: null,
     enLigne: true,
-    dernierMessage: 'Super ! Luna a bien mangé c...',
+    dernierMessage: 'Super ! Luna a bien mangÃ© c...',
     heure: '14:32',
     nonLus: 0,
-    garde: { animal: 'Luna', dates: '10–17 mars 2025', statut: 'confirmee', gardeId: '1' },
+    garde: { animal: 'Luna', dates: '10â€“17 mars 2025', statut: 'confirmee', gardeId: '1' },
     messages: [
-      { id: 1, texte: 'Bonjour Camille ! Je suis prêt pour accueillir Luna lundi 😊', heure: '10:14', moi: false, lu: true },
+      { id: 1, texte: 'Bonjour Camille ! Je suis prÃªt pour accueillir Luna lundi ðŸ˜Š', heure: '10:14', moi: false, lu: true },
       { id: 2, texte: "Super Jules ! Elle adore jouer avec une balle, je vous l'apporte avec son panier", heure: '10:22', moi: true, lu: true },
-      { id: 3, texte: 'Parfait ! Et concernant ses médicaments, je lui donne bien le comprimé le matin avec la gamelle ?', heure: '10:25', moi: false, lu: true },
-      { id: 4, texte: 'Exactement, à mélanger dans la pâtée humide. Merci beaucoup Jules 🕯️', heure: '10:31', moi: true, lu: true },
-      { id: 5, texte: 'Luna a bien mangé ce matin, elle est en pleine forme ! 🐾', heure: '14:32', moi: false, lu: true, photo: 'mock-luna' },
-      { id: 6, texte: 'Oh elle est trop mignonne 🥰 merci pour la photo !', heure: '14:45', moi: true, lu: true },
+      { id: 3, texte: 'Parfait ! Et concernant ses mÃ©dicaments, je lui donne bien le comprimÃ© le matin avec la gamelle ?', heure: '10:25', moi: false, lu: true },
+      { id: 4, texte: 'Exactement, Ã  mÃ©langer dans la pÃ¢tÃ©e humide. Merci beaucoup Jules ðŸ•¯ï¸', heure: '10:31', moi: true, lu: true },
+      { id: 5, texte: 'Luna a bien mangÃ© ce matin, elle est en pleine forme ! ðŸ¾', heure: '14:32', moi: false, lu: true, photo: 'mock-luna' },
+      { id: 6, texte: 'Oh elle est trop mignonne ðŸ¥° merci pour la photo !', heure: '14:45', moi: true, lu: true },
     ],
   },
   {
@@ -53,20 +53,20 @@ const MOCK_CONVERSATIONS: Conversation[] = [
     heure: 'Hier',
     nonLus: 2,
     messages: [
-      { id: 1, texte: 'Bonjour, je serais disponible du 20 au 25 mars pour Minou si vous êtes intéressée !', heure: '09:30', moi: false, lu: false },
-      { id: 2, texte: 'Je peux aussi faire une visite avant si vous le souhaitez 😊', heure: '09:31', moi: false, lu: false },
+      { id: 1, texte: 'Bonjour, je serais disponible du 20 au 25 mars pour Minou si vous Ãªtes intÃ©ressÃ©e !', heure: '09:30', moi: false, lu: false },
+      { id: 2, texte: 'Je peux aussi faire une visite avant si vous le souhaitez ðŸ˜Š', heure: '09:31', moi: false, lu: false },
     ],
   },
   {
     id: 'lea-r',
-    nom: 'Léa R.',
+    nom: 'LÃ©a R.',
     avatar: null,
     enLigne: false,
     dernierMessage: 'Merci pour votre confiance !',
     heure: 'Lun',
     nonLus: 2,
     messages: [
-      { id: 1, texte: 'Bonjour ! Bien sûr que je peux m\'occuper de Rex.', heure: 'Lun 10:00', moi: false, lu: false },
+      { id: 1, texte: 'Bonjour ! Bien sÃ»r que je peux m\'occuper de Rex.', heure: 'Lun 10:00', moi: false, lu: false },
       { id: 2, texte: 'Merci pour votre confiance !', heure: 'Lun 10:02', moi: false, lu: false },
     ],
   },
@@ -75,17 +75,17 @@ const MOCK_CONVERSATIONS: Conversation[] = [
     nom: 'Thomas B.',
     avatar: null,
     enLigne: false,
-    dernierMessage: 'D\'accord, on se retrouve à 18...',
+    dernierMessage: 'D\'accord, on se retrouve Ã  18...',
     heure: '12/03',
     nonLus: 0,
     messages: [
       { id: 1, texte: 'Bonjour Thomas, est-ce possible de faire une visite demain ?', heure: '12/03', moi: true, lu: true },
-      { id: 2, texte: 'D\'accord, on se retrouve à 18h chez moi !', heure: '12/03', moi: false, lu: true },
+      { id: 2, texte: 'D\'accord, on se retrouve Ã  18h chez moi !', heure: '12/03', moi: false, lu: true },
     ],
   },
 ]
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function MessageriePage() {
   const [convs, setConvs]         = useState<Conversation[]>(MOCK_CONVERSATIONS)
   const [activeId, setActiveId]   = useState<string>(MOCK_CONVERSATIONS[0].id)
@@ -117,12 +117,12 @@ export default function MessageriePage() {
       photo: photoPreview ? URL.createObjectURL(photoPreview) : undefined,
     }
     setConvs(prev => prev.map(c => c.id === activeId
-      ? { ...c, messages: [...c.messages, msg], dernierMessage: txt || '📷 Photo', heure: now }
+      ? { ...c, messages: [...c.messages, msg], dernierMessage: txt || 'ðŸ“· Photo', heure: now }
       : c
     ))
     setTexte('')
     setPhotoPreview(null)
-    // TODO: WebSocket → send message
+    // TODO: WebSocket â†’ send message
   }
 
   const filteredConvs = convs.filter(c =>
@@ -135,12 +135,12 @@ export default function MessageriePage() {
     <div className="h-screen flex flex-col" style={{ fontFamily: "'Nunito', sans-serif" }}>
 
       {/* Navbar */}
-      <Header isConnected />
+      <Header />
 
       {/* Corps */}
       <div className="flex flex-1 overflow-hidden" style={{ backgroundColor: '#F0EBE1' }}>
 
-        {/* ── Sidebar contacts ───────────────────────────────── */}
+        {/* â”€â”€ Sidebar contacts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <aside className="w-64 shrink-0 bg-white border-r border-gray-100 flex flex-col">
           <div className="px-4 py-4 border-b border-gray-100">
             <div className="flex items-center justify-between mb-3">
@@ -195,7 +195,7 @@ export default function MessageriePage() {
           </div>
         </aside>
 
-        {/* ── Zone chat ──────────────────────────────────────── */}
+        {/* â”€â”€ Zone chat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div className="flex-1 flex flex-col overflow-hidden bg-[#F0EBE1]">
 
           {/* Header conversation */}
@@ -217,7 +217,7 @@ export default function MessageriePage() {
             <Link to={`/gardiens/${conv.id}`}
               className="text-sm font-bold hover:underline transition-colors"
               style={{ color: '#3A5220' }}>
-              Voir le profil →
+              Voir le profil â†’
             </Link>
           </div>
 
@@ -225,14 +225,14 @@ export default function MessageriePage() {
           {conv.garde && (
             <div className="mx-6 mt-4 px-4 py-3 rounded-xl flex items-center justify-between" style={{ backgroundColor: '#E8F0DC' }}>
               <div className="flex items-center gap-3">
-                <span className="text-lg">🐾</span>
+                <span className="text-lg">ðŸ¾</span>
                 <div>
-                  <p className="text-sm font-black text-gray-900">Garde de {conv.garde.animal} · {conv.garde.dates}</p>
+                  <p className="text-sm font-black text-gray-900">Garde de {conv.garde.animal} Â· {conv.garde.dates}</p>
                   <p className="text-xs font-semibold" style={{ color: '#3A5220' }}>
-                    {conv.garde.statut === 'confirmee' ? 'Confirmée' : 'En attente'}
-                    {' · '}
+                    {conv.garde.statut === 'confirmee' ? 'ConfirmÃ©e' : 'En attente'}
+                    {' Â· '}
                     <Link to={`/garde/${conv.garde.gardeId}/suivi`} className="hover:underline">
-                      Voir le journal →
+                      Voir le journal â†’
                     </Link>
                   </p>
                 </div>
@@ -249,7 +249,7 @@ export default function MessageriePage() {
                   {msg.photo && (
                     <div className="rounded-2xl overflow-hidden w-52 h-36 bg-gray-200 flex items-center justify-center">
                       {msg.photo === 'mock-luna'
-                        ? <div className="w-full h-full bg-[#D4E6C3] flex items-center justify-center text-5xl">🐕</div>
+                        ? <div className="w-full h-full bg-[#D4E6C3] flex items-center justify-center text-5xl">ðŸ•</div>
                         : <img src={msg.photo} alt="photo" className="w-full h-full object-cover" />
                       }
                     </div>
@@ -269,7 +269,7 @@ export default function MessageriePage() {
                   <div className={`flex items-center gap-1 ${msg.moi ? 'flex-row-reverse' : ''}`}>
                     <span className="text-xs text-gray-400">{msg.heure}</span>
                     {msg.moi && (
-                      <span className="text-xs" style={{ color: msg.lu ? '#3A5220' : '#9CA3AF' }}>✓✓</span>
+                      <span className="text-xs" style={{ color: msg.lu ? '#3A5220' : '#9CA3AF' }}>âœ“âœ“</span>
                     )}
                   </div>
                 </div>
@@ -283,7 +283,7 @@ export default function MessageriePage() {
             <div className="mx-6 mb-2 flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-gray-200 w-fit">
               <img src={URL.createObjectURL(photoPreview)} alt="" className="w-10 h-10 rounded-lg object-cover" />
               <span className="text-xs text-gray-600 font-semibold">{photoPreview.name}</span>
-              <button type="button" onClick={() => setPhotoPreview(null)} className="text-gray-400 hover:text-red-400 ml-1">×</button>
+              <button type="button" onClick={() => setPhotoPreview(null)} className="text-gray-400 hover:text-red-400 ml-1">Ã—</button>
             </div>
           )}
 
@@ -293,13 +293,13 @@ export default function MessageriePage() {
               {/* Attach */}
               <button type="button" onClick={() => fileInputRef.current?.click()}
                 className="text-gray-400 hover:text-[#3A5220] transition-colors text-lg shrink-0">
-                📎
+                ðŸ“Ž
               </button>
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
                 onChange={e => setPhotoPreview(e.target.files?.[0] ?? null)} />
 
               {/* Text */}
-              <input type="text" placeholder="Écrire un message..." value={texte}
+              <input type="text" placeholder="Ã‰crire un message..." value={texte}
                 onChange={e => setTexte(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && envoyer()}
                 className="flex-1 text-sm focus:outline-none bg-transparent placeholder-gray-400" />
@@ -309,7 +309,7 @@ export default function MessageriePage() {
                 disabled={!texte.trim() && !photoPreview}
                 className="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0 transition-all disabled:opacity-30 hover:opacity-90"
                 style={{ backgroundColor: '#D91B5C' }}>
-                →
+                â†’
               </button>
             </div>
           </div>
@@ -318,3 +318,4 @@ export default function MessageriePage() {
     </div>
   )
 }
+

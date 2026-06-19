@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { api } from '../services/api'
+import Header from '../components/Header'
 
 type Role = 'proprio' | 'gardien' | 'les-deux' | null
 
@@ -60,7 +63,7 @@ function StepIndicator({ steps, current }: { steps: StepKey[]; current: number }
               </span>
             </div>
             {i < steps.length - 1 && (
-              <div className={`w-12 h-[2px] mt-[18px] ${done ? 'bg-[#5A7A1A]' : 'bg-gray-200'}`} />
+              <div className={`w-12 h-0.5 mt-4.5 ${done ? 'bg-[#5A7A1A]' : 'bg-gray-200'}`} />
             )}
           </div>
         )
@@ -112,7 +115,8 @@ function CalendarPicker({ selected, onChange, recurring, onRecurringChange }: Ca
 
   const toggleDate = (key: string) => {
     const next = new Set(selected)
-    next.has(key) ? next.delete(key) : next.add(key)
+    if (next.has(key)) next.delete(key)
+    else next.add(key)
     onChange(next)
   }
 
@@ -198,10 +202,22 @@ function CalendarPicker({ selected, onChange, recurring, onRecurringChange }: Ca
   )
 }
 
+// ─── Champ formulaire label + input ─────────────────────────────────────────
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1">{children && <label className="text-sm font-bold text-gray-800">{label}</label>}{children}</div>
+  )
+}
+
 // ─── Composant principal ─────────────────────────────────────────────────────
 export default function RegisterPage() {
+  const { login, isAuthenticated, isLoading, isAdmin, user } = useAuth()
+  const navigate = useNavigate()
+
   const [step, setStep]   = useState(1)
   const [role, setRole]   = useState<Role>(null)
+  const [error, setError]           = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [infos, setInfos] = useState({ firstName: '', lastName: '', email: '', password: '', cgu: false })
   const [animaux, setAnimaux] = useState<Animal[]>([{ ...EMPTY_ANIMAL }])
@@ -214,6 +230,10 @@ export default function RegisterPage() {
     bio: '',
     animauxGardes: [] as string[],
   })
+
+  if (!isLoading && isAuthenticated) {
+    return <Navigate to={isAdmin ? '/admin' : user?.est_gardien ? '/dashboard' : '/dashboard-proprio'} replace />
+  }
 
   const steps = getSteps(role)
   const totalSteps = steps.length
@@ -233,21 +253,71 @@ export default function RegisterPage() {
   const addAnimal    = () => setAnimaux(prev => [...prev, { ...EMPTY_ANIMAL }])
   const removeAnimal = (i: number) => setAnimaux(prev => prev.filter((_, idx) => idx !== i))
 
-  const handleFinalSubmit = (e: { preventDefault: () => void }) => {
+  const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: appel API
+    setError('')
+    setIsSubmitting(true)
+    try {
+      // 1. Créer le compte
+      await api.post('/auth/signup', {
+        email: infos.email,
+        password: infos.password,
+        nom: infos.lastName,
+        prenom: infos.firstName,
+      })
+
+      // 2. Se connecter pour obtenir les tokens
+      await login(infos.email, infos.password)
+
+      // 3. Mettre à jour le profil (charte + rôle gardien + expérience)
+      const profileUpdate: Record<string, unknown> = {
+        charte_acceptee: true,
+        est_gardien: role === 'gardien' || role === 'les-deux',
+      }
+      if (role === 'gardien' || role === 'les-deux') {
+        if (experience.bio) profileUpdate.description_gardien = experience.bio
+        if (experience.niveau && experience.annees)
+          profileUpdate.experience_animaux = `${experience.niveau} — ${experience.annees} ans`
+        if (experience.animauxGardes.length)
+          profileUpdate.animaux_acceptes = experience.animauxGardes.map(a => a.toLowerCase())
+        const activeGardeTypes = Object.entries(gardeTypes)
+          .filter(([, v]) => v).map(([k]) => k)
+        if (activeGardeTypes.length) profileUpdate.type_de_garde = activeGardeTypes
+      }
+      await api.patch('/users/me', profileUpdate)
+
+      // 4. Créer les animaux (si propriétaire ou les deux)
+      if (role === 'proprio' || role === 'les-deux') {
+        for (const animal of animaux) {
+          if (!animal.nom || !animal.espece) continue
+          await api.post('/animals', {
+            nom: animal.nom,
+            espece: animal.espece.toLowerCase(),
+            race: animal.race || null,
+            age: animal.age ? parseInt(animal.age) || null : null,
+            poids: animal.poids ? parseFloat(animal.poids) || null : null,
+            sexe: animal.sexe || null,
+            caractere: animal.caracteres.length ? animal.caracteres.join(', ') : null,
+            besoins_specifiques: animal.besoins || null,
+          })
+        }
+      }
+
+      // 5. Redirection selon le rôle
+      if (role === 'gardien') navigate('/dashboard')
+      else navigate('/dashboard-proprio')
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors de l'inscription")
+      setIsSubmitting(false)
+    }
   }
 
-  // Formulaire commun label + input
-  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div className="flex flex-col gap-1">{children && <label className="text-sm font-bold text-gray-800">{label}</label>}{children}</div>
-  )
   const inputCls = "border border-gray-200 rounded-xl px-4 py-3 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3A5220] focus:border-transparent"
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Nunito', sans-serif" }}>
-      <header className="w-full h-16 bg-[#0D0D0D]" />
-      <div className="w-full h-[3px] bg-[#4A90D9]" />
+      <Header />
 
       <main className="flex-1 flex flex-col items-center px-4 py-10" style={{ backgroundColor: '#F0EBE1' }}>
 
@@ -255,7 +325,7 @@ export default function RegisterPage() {
         {step === 1 && (
           <>
             <img src="/logo1.png" alt="L'Arche" className="h-16 w-auto mb-8" />
-            <div className="bg-white rounded-2xl shadow-sm w-full max-w-[520px] overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm w-full max-w-130 overflow-hidden">
               <div className="px-10 py-8">
                 <div className="text-center mb-8">
                   <h1 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Créer mon compte</h1>
@@ -311,7 +381,7 @@ export default function RegisterPage() {
 
         {/* ── Étape Mon animal (proprio / les-deux) ────────────── */}
         {step > 1 && stepKey === 'animal' && (
-          <div className="bg-white rounded-2xl shadow-sm w-full max-w-[520px] px-8 py-8">
+          <div className="bg-white rounded-2xl shadow-sm w-full max-w-130 px-8 py-8">
             <p className="text-xs font-black tracking-widest mb-1" style={{ color: '#5A7A1A' }}>ÉTAPE {step} SUR {totalSteps}</p>
             <h1 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Mon animal</h1>
             <p className="text-sm text-gray-500 mb-6">Présentez votre compagnon pour trouver le gardien parfait</p>
@@ -385,7 +455,7 @@ export default function RegisterPage() {
 
         {/* ── Étape Expérience ──────────────────────────────────── */}
         {step > 1 && stepKey === 'experience' && (
-          <div className="bg-white rounded-2xl shadow-sm w-full max-w-[520px] px-8 py-8">
+          <div className="bg-white rounded-2xl shadow-sm w-full max-w-130 px-8 py-8">
             <p className="text-xs font-black tracking-widest mb-1" style={{ color: '#5A7A1A' }}>ÉTAPE {step} SUR {totalSteps}</p>
             <h1 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Mon expérience</h1>
             <p className="text-sm text-gray-500 mb-6">Parlez-nous de votre expérience avec les animaux</p>
@@ -466,7 +536,7 @@ export default function RegisterPage() {
 
         {/* ── Étape Disponibilités ──────────────────────────────── */}
         {step > 1 && stepKey === 'dispos' && (
-          <div className="bg-white rounded-2xl shadow-sm w-full max-w-[520px] px-8 py-8">
+          <div className="bg-white rounded-2xl shadow-sm w-full max-w-130 px-8 py-8">
             <p className="text-xs font-black tracking-widest mb-1" style={{ color: '#5A7A1A' }}>ÉTAPE {step} SUR {totalSteps}</p>
             <h1 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Mes disponibilités</h1>
             <p className="text-sm text-gray-500 mb-6">Indiquez quand vous pouvez accueillir des animaux</p>
@@ -508,11 +578,16 @@ export default function RegisterPage() {
 
         {/* ── Étape Vérification ────────────────────────────────── */}
         {step > 1 && stepKey === 'verif' && (
-          <div className="bg-white rounded-2xl shadow-sm w-full max-w-[520px] px-8 py-8">
+          <div className="bg-white rounded-2xl shadow-sm w-full max-w-130 px-8 py-8">
             <p className="text-xs font-black tracking-widest mb-1" style={{ color: '#5A7A1A' }}>ÉTAPE {step} SUR {totalSteps}</p>
             <h1 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Vérification</h1>
             <p className="text-sm text-gray-500 mb-6">Vérifiez vos informations avant de valider</p>
             <form onSubmit={handleFinalSubmit} className="flex flex-col gap-5">
+              {error && (
+                <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
               <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 space-y-2">
                 <p><span className="font-bold">Nom :</span> {infos.firstName} {infos.lastName}</p>
                 <p><span className="font-bold">Email :</span> {infos.email}</p>
@@ -524,8 +599,8 @@ export default function RegisterPage() {
               </div>
               <div className="flex gap-3">
                 <button type="button" onClick={goBack} className="px-6 py-3 rounded-xl border-2 border-gray-800 text-gray-800 font-bold text-sm hover:bg-gray-50 transition">← Retour</button>
-                <button type="submit" className="flex-1 py-3 rounded-xl font-bold text-white text-sm hover:opacity-90 transition" style={{ backgroundColor: '#3A5220' }}>
-                  Valider mon inscription →
+                <button type="submit" disabled={isSubmitting} className="flex-1 py-3 rounded-xl font-bold text-white text-sm hover:opacity-90 transition disabled:opacity-50" style={{ backgroundColor: '#3A5220' }}>
+                  {isSubmitting ? 'Inscription...' : 'Valider mon inscription →'}
                 </button>
               </div>
             </form>
